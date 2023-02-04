@@ -1,2 +1,2 @@
-Sinope - pipe reaction analysie
----------------------------------------
+Sinope - pipe reaction analysis app
+-----------------------------------
