@@ -1,0 +1,7 @@
+*.pyc
+*.spec
+MANIFEST
+dist
+build
+__pycache__
+.idea/
