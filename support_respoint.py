@@ -1,33 +1,79 @@
 '''
 This file is part of sinope.
 '''
+
+import numpy as np
 from utils import find_max, find_min, find_maxabs
 
-class member_respoint():
+class support_respoint():
 
     def __init__(self, id=None):
-        self.number = None
-        self.node = None
+        self.point = None
+        self.type = None
+        self.tag = None
         #--
-        self.unit_force = '[kip]'
-        self.unit_moment = '[kip-ft]'
+        self.CordX = None
+        self.CordY = None
+        self.CordZ = None
         #--
-        self.res = []
+        self.data_E_DOWN = np.array([0, 0, 0, 0, 0, 0])
+        self.data_E_E_W = np.array([0, 0, 0, 0, 0, 0])
+        self.data_E_N_S = np.array([0, 0, 0, 0, 0, 0])
+        self.data_E_UP = np.array([0, 0, 0, 0, 0, 0])
+        
+        self.data_Gravity = np.array([0, 0, 0, 0, 0, 0])
+        
+        self.data_Pressure1 = np.array([0, 0, 0, 0, 0, 0])
+        self.data_Pressure2 = np.array([0, 0, 0, 0, 0, 0])
+        self.data_Pressure3 = np.array([0, 0, 0, 0, 0, 0])
+        
+        self.data_SAM1 = np.array([0, 0, 0, 0, 0, 0])
+        self.data_SAM2 = np.array([0, 0, 0, 0, 0, 0])
+        
+        self.data_Therma1 = np.array([0, 0, 0, 0, 0, 0])
+        self.data_Therma2 = np.array([0, 0, 0, 0, 0, 0])
+        self.data_Therma3 = np.array([0, 0, 0, 0, 0, 0])
+        
+        self.data_W_E_W = np.array([0, 0, 0, 0, 0, 0])
+        self.data_W_N_S = np.array([0, 0, 0, 0, 0, 0])
         #--
-        self.colLC = 1
-        self.colFx = 3
-        self.colFy = 4
-        self.colFz = 5
-        self.colMx = 6
-        self.colMy = 7
-        self.colMz = 8
-        self.colMtot = 9
-        self.colVtot = 10
-        self.colboltmaxtension = 11
-        self.colmaxboltcompression = 12
-        self.colmaxboltshear = 13
-        self.colFynorm = 14
-        self.colFznorm = 15
+        
+    @property
+    def force_Gravity(self):
+        return self.data_Gravity
+    
+    
+    
+    
+        # out gravity, EQ E_W, EQ E_W, Pressure, SAM, Thermal,  W E_W, W E_W
+        
+        # s1 + s2, s1 * s2
+'''
+LOAD R1 LOADTYPE Gravity  TITLE SELF-WEIGHT Y-
+LOAD R2 LOADTYPE Dead  TITLE ADDITIONAL FRAMING WEIGHT
+LOAD R3 LOADTYPE Dead  TITLE DL_SERVICES
+LOAD R11 LOADTYPE None  TITLE PSAS P&T X+
+*X-dir = East-West direction for this rack
+LOAD R12 LOADTYPE None  TITLE PSAS P&T Z+
+*Z-dir = North-South direction for this rack
+LOAD R13 LOADTYPE None  TITLE PSAS P&T Y-
+LOAD R21 LOADTYPE Seismic-H  TITLE EQ SEISMIC_MASS_X
+LOAD R22 LOADTYPE Seismic-H  TITLE EQ SEISMIC_MASS_Z
+LOAD R23 LOADTYPE Seismic-H  TITLE EQ PSAS X+
+LOAD R24 LOADTYPE Seismic-H  TITLE EQ PSAS Z+
+LOAD R25 LOADTYPE Seismic-V  TITLE EQ PSAS Y-
+LOAD R26 LOADTYPE Seismic-H  TITLE EQ PSAS S.A.M.X+
+LOAD R27 LOADTYPE Seismic-H  TITLE EQ PSAS S.A.M.Z+
+LOAD R28 LOADTYPE Seismic-V  TITLE EQ PSAS S.A.M.Y-
+LOAD R31 LOADTYPE Wind  TITLE WIND_PSAS_X+
+LOAD R32 LOADTYPE Wind  TITLE WIND_PSAS_Z+
+LOAD R33 LOADTYPE Wind  TITLE WIND_PSAS_Y-
+LOAD R34 LOADTYPE Wind  TITLE WIND_STR_X+
+LOAD R35 LOADTYPE Wind  TITLE WIND_STR_Z+
+LOAD R36 LOADTYPE Wind  TITLE WIND_STR_Y-
+'''
+
+
 
 
 
@@ -263,33 +309,9 @@ class member_respoint():
 
 #test if main
 if __name__ == '__main__': 
-    m = member_respoint()
+    m = support_respoint()
 
-'''
-    m.number = '2i'
-    m.node = '1'
-    #              L/C	Node     Fx     Fy      Fz    Mx  	 My 	Mz
-    m.res.append(['1', '100', '9', 12.782, -0.283, 6.743, -0.003, 0,  4.299])
-    m.res.append(['', '101', '9', 15.134, -53.945, 8.024, 0.014, 0, -239.807])
-    m.calc_additional_forces()
-    print(m.res[0])
-    print(m.res[1])
-    tab = []
-    tab.append(['Member', 'LC', 'Node', 'Fx', 'Fy', 'Fz', 'Mx', 'My', 'Mz', 'Mtot', 'Vtot', 'boltmaxtension', 'boltcompression', 'maxboltshear',  'Fynorm',  'Fznorm'])
-    tab.append(m.res[0])
-    tab.append(m.res[1])
-    from tabulate import tabulate
-    print(m.number)
-    print(tabulate(tab, headers="firstrow", tablefmt="grid"))
-    print(m.Fynormmax)
-    print(m.Fynormmin)
-    print(m.Fznormmax)
-    print(m.Fznormmin)
-    print(m.Fynormlist)
-    print(m.Fznormlist)
-    print(m.Mymax)
-    print(m.Mymin)
-'''
+
     
 
  
