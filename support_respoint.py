@@ -16,6 +16,8 @@ class support_respoint():
         self.CordY = None
         self.CordZ = None
         #--
+        #reaction data
+        #self_reaction data
         self.data_E_DOWN = np.array([0, 0, 0, 0, 0, 0])
         self.data_E_E_W = np.array([0, 0, 0, 0, 0, 0])
         self.data_E_N_S = np.array([0, 0, 0, 0, 0, 0])

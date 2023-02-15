@@ -1,19 +1,34 @@
+from PyQt5 import QtWidgets
+import support_respoint
+import openpyxl
+
+
+class data_loader():
+
+
+    def __init__(self, id=None):
+        self.opendir = None
+        self.filename = None
+
+    def get_data_from_file(self, filepath):
+        pass
+
+#test if main
+if __name__ == '__main__':
+    loader = data_loader()
+    filepatch = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    wookbook = openpyxl.load_workbook(filepatch)
+    worksheet = wookbook.active
+
+    for row in worksheet.values:
+        print(row)
+        #for value in row:
+        #    print(value)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+'''
 def load_sap_data():
     global opendir
     global filename
@@ -83,3 +98,4 @@ def load_sap_data():
     myapp.ui.textBrowser_output.setText('>>>> %s res point data loaded from %s <<<<'%(len(res_dict.keys()), os.path.basename(filename)))
 
     set_title(info = ' - ' + os.path.basename(filename))
+'''
