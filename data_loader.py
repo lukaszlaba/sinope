@@ -13,6 +13,23 @@ class data_loader():
     def get_data_from_file(self, filepath):
         pass
 
+
+
+import numpy as np
+import pandas as pd
+# List of Tuples
+matrix = [(10, 56, 17),
+          (np.NaN, 23, 11),
+          (49, 36, 55),
+          (75, np.NaN, 34),
+          (89, 21, 44)
+          ]
+# Create a DataFrame
+abc = pd.DataFrame(matrix, index=list('abcde'), columns=list('xyz'))
+ 
+# output
+abc
+
 #test if main
 if __name__ == '__main__':
     loader = data_loader()
@@ -20,10 +37,16 @@ if __name__ == '__main__':
     wookbook = openpyxl.load_workbook(filepatch)
     worksheet = wookbook.active
 
+    data = []
+
     for row in worksheet.values:
-        print(row)
-        #for value in row:
-        #    print(value)
+        if row[1]:
+            row = list(row)[:14]
+            for i in range(len(row)) :
+                if row[i] == None:
+                    row[i] = 0.0
+            data.append(row)
+
 
 
 
