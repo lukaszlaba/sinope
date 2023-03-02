@@ -26,7 +26,7 @@ matrix = [(10, 56, 17),
           ]
 # Create a DataFrame
 abc = pd.DataFrame(matrix, index=list('abcde'), columns=list('xyz'))
- 
+
 # output
 abc
 
