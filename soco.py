@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
 import sys
-import win32com.client
+#import win32com.client
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -33,8 +33,10 @@ from tabulate import tabulate
 import matplotlib.pyplot as plt
 
 from mainwindow_ui import Ui_MainWindow
-from member_respoint import member_respoint
+from support_respoint1 import support_respoint
 from preset_content import preset_dict
+
+import pandas
 
 res_dict = {}
 unit_force = '[]'
@@ -75,6 +77,33 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         #--
         self.ui.pushButton_info.clicked.connect(info)
         self.ui.pushButton_print.clicked.connect(print_report)
+
+support_list = []
+excel_data_df = None
+def loaddata():
+    global excel_data_df
+    global support_list
+    excel_data_df = pandas.read_excel('C:\FAB-SSS-10_LoadReportForStructural.xlsx', sheet_name='SUPPORTS')
+    list_of_points = excel_data_df['Point'].drop_duplicates().tolist()
+    excel_data_df = excel_data_df.rename(columns={  'SumOfBuildingFX': 'FX', 
+                                                    'SumOfBuildingFY': 'FY',
+                                                    'SumOfBuildingFZ': 'FZ',
+                                                    'SumOfBuildingMX': 'MX',
+                                                    'SumOfBuildingMY': 'MY',
+                                                    'SumOfBuildingMZ': 'MZ',
+                                                    'CoordX': 'X',
+                                                    'CoordY': 'Y',
+                                                    'CoordZ': 'Z',
+                                                    'Combination': 'Comb'
+                                                    })
+    #excel_data_df["MX"] = excel_data_df["MX"].fillna(0)
+    for point in list_of_points:
+        df1 = excel_data_df[excel_data_df['Point'] == point]
+        support_list.append(support_respoint(df1))
+
+
+
+
 
 def clbResults():
     from tkinter import Tk
@@ -1110,18 +1139,21 @@ Check for lataest version: https://github.com/lukaszlaba/soco/releases
 '''
     myapp.ui.textBrowser_output.setText(about)
 
-if __name__ == '__main__': 
-    app = QtWidgets.QApplication(sys.argv)
-    myapp = MAINWINDOW()
-    print_dialog = QPrintDialog()
-    set_title()
-    myapp.ui.textBrowser_output.setText('Welcome in soco - Staad member force extract tool! Load data and fill input list to get report.')
-    myapp.ui.plainTextEdit_serch.clear()
-    myapp.setWindowIcon(QtGui.QIcon('app.ico'))
-    myapp.ui.comboBox_preset.addItems(preset_dict.keys())
-    myapp.ui.comboBox_preset.setCurrentIndex(3)
-    myapp.show()
-    sys.exit(app.exec_())
+if __name__ == '__main__':
+    loaddata()
+    s1 = support_list[0]
+    
+    # app = QtWidgets.QApplication(sys.argv)
+    # myapp = MAINWINDOW()
+    # print_dialog = QPrintDialog()
+    # set_title()
+    # myapp.ui.textBrowser_output.setText('Welcome in soco - Staad member force extract tool! Load data and fill input list to get report.')
+    # myapp.ui.plainTextEdit_serch.clear()
+    # myapp.setWindowIcon(QtGui.QIcon('app.ico'))
+    # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
+    # myapp.ui.comboBox_preset.setCurrentIndex(3)
+    # myapp.show()
+    # sys.exit(app.exec_())
 
 
 '''
