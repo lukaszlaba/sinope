@@ -11,28 +11,35 @@ class support_respoint():
         self.df = data
         
     @property
-    def type(self):
-        return self.df['Type'][0]
+    def Point(self):
+        return self.df['Point'].iloc[0]
+    
+    @property
+    def Type(self):
+        return self.df['Type'].iloc[0]
 
     @property
-    def tag(self):
-        return self.df['Tag'][0]
+    def Tag(self):
+        return self.df['Tag'].iloc[0]
 
     @property
-    def coordinateXYZ(self):
-        return [self.df['X'][0],  self.df['Y'][0], self.df['Z'][0]]
+    def CoordinateXYZ(self):
+        return [self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0]]
 
     @property
-    def bese_reactions(self):
+    def Bese_reactions(self):
         to_get_list = ['Comb']
-        if str(self.df['FX'][0]) != str(float("nan")) : to_get_list.append('FX')
-        if str(self.df['FY'][0]) != str(float("nan")) : to_get_list.append('FY')
-        if str(self.df['FZ'][0]) != str(float("nan")) : to_get_list.append('FZ')
-        if str(self.df['MX'][0]) != str(float("nan")) : to_get_list.append('MX')
-        if str(self.df['MY'][0]) != str(float("nan")) : to_get_list.append('MY')
-        if str(self.df['MZ'][0]) != str(float("nan")) : to_get_list.append('MZ')
+        if str(self.df['FX'].iloc[0]) != str(float("nan")) : to_get_list.append('FX')
+        if str(self.df['FY'].iloc[0]) != str(float("nan")) : to_get_list.append('FY')
+        if str(self.df['FZ'].iloc[0]) != str(float("nan")) : to_get_list.append('FZ')
+        if str(self.df['MX'].iloc[0]) != str(float("nan")) : to_get_list.append('MX')
+        if str(self.df['MY'].iloc[0]) != str(float("nan")) : to_get_list.append('MY')
+        if str(self.df['MZ'].iloc[0]) != str(float("nan")) : to_get_list.append('MZ')
         return self.df.loc[:,to_get_list]
+    
 
+    def __str__(self):
+        return self.Point + ',' + self.Type
 '''
 LOAD R1 LOADTYPE Gravity  TITLE SELF-WEIGHT Y-
 LOAD R2 LOADTYPE Dead  TITLE ADDITIONAL FRAMING WEIGHT
