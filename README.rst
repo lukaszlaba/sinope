@@ -1,4 +1,4 @@
-Sinope - J-MEPCon strees pipe reaction analysis app
+Sinope - J-MEPCon stress pipe reaction analysis app
 ---------------------------------------------------
 
 THIS APP IS IN PROGRESS
