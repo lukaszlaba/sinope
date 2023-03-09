@@ -218,11 +218,19 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
         report += str(point) + '\n'
         report += point.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
-    
 
-
-
-
+def merged_reaction_report(filterlist=['AG01', 'AG05']):#<<<<<<<<<<<<<<<<<<<<<<<<HERE
+    report = ''
+    outpoint  = support_respoint()
+    if true: # opcja dodawanie
+        for i in filterlist:
+            outpoint += support_dict[i]
+    if true:# opcja mnożenie
+        for i in filterlist:
+            outpoint *= support_dict[i]       
+    report += str(outpoint) + '\n'
+    report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
+    return report
 
 def show_report():
     if is_pointlist_empty():
@@ -327,17 +335,20 @@ if __name__ == '__main__':
     
     app = QtWidgets.QApplication(sys.argv)
     myapp = MAINWINDOW()
-    print_dialog = QPrintDialog()
-    set_title()
-    myapp.ui.textBrowser_output.setText('Welcome in soco - Staad member force extract tool! Load data and fill input list to get report.')
-    myapp.ui.plainTextEdit_serch.clear()
-    myapp.setWindowIcon(QtGui.QIcon('app.ico'))
-    # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
-    # myapp.ui.comboBox_preset.setCurrentIndex(3)
-    myapp.show()
+    # print_dialog = QPrintDialog()
+    # set_title()
+    # myapp.ui.textBrowser_output.setText('Welcome in soco - Staad member force extract tool! Load data and fill input list to get report.')
+    # myapp.ui.plainTextEdit_serch.clear()
+    # myapp.setWindowIcon(QtGui.QIcon('app.ico'))
+    # # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
+    # # myapp.ui.comboBox_preset.setCurrentIndex(3)
+    # myapp.show()
     
     loaddata()
     s1 = support_dict[list(support_dict.keys())[0]]
+    s2 = support_dict[list(support_dict.keys())[1]]
+    s3 = support_dict[list(support_dict.keys())[2]]
+    s1+s2
     sys.exit(app.exec_())
 
 

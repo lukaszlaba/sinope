@@ -3,12 +3,60 @@ This file is part of sinope.
 '''
 
 import numpy as np
+import pandas as pd
 from utils import find_max, find_min, find_maxabs
 
 class support_respoint():
 
-    def __init__(self, data=None):
+    def __init__(self, data=pd.DataFrame({'A' : []})):
         self.df = data
+        
+    def __add__(self, other):
+        if self.df.empty:
+            return support_respoint(other.df.copy())
+        #----
+        this = self.df.copy()
+        this.reset_index(inplace=True)
+        print(this)
+        other = other.df.copy()
+        other.reset_index(inplace=True)
+        print(other)
+        out = self.df.copy()
+        out.reset_index(inplace=True)
+        print(out)
+        for index, row in out.iterrows():
+            print (index)
+            out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+            #----
+            if out.at[index, 'Comb'] == 'E(E/W)':
+                out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+            else:
+                out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+        #(.....!!!.....)
+        return support_respoint(out)
+
+    def __mul__(self, other):
+        this = self.df.copy()
+        this.reset_index(inplace=True)
+        print(this)
+        other = other.df.copy()
+        other.reset_index(inplace=True)
+        print(other)
+        out = self.df.copy()
+        out.reset_index(inplace=True)
+        print(out)
+        for index, row in out.iterrows():
+            print (index)
+            out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+            #-----
+            if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                out.at[index, 'FY'] = this.at[index, 'FY']
+            else:
+                out.at[index, 'FY'] = other.at[index, 'FY']
+        #(..........)
+        return support_respoint(out)
         
     @property
     def Point(self):
@@ -36,7 +84,6 @@ class support_respoint():
         if str(self.df['MY'].iloc[0]) != str(float("nan")) : to_get_list.append('MY')
         if str(self.df['MZ'].iloc[0]) != str(float("nan")) : to_get_list.append('MZ')
         return self.df.loc[:,to_get_list]
-    
 
     def __str__(self):
         return self.Point + ',' + self.Type
