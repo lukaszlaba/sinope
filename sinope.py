@@ -24,12 +24,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 import os
 import sys
 #import win32com.client
+import openpyxl #pandas need this!!
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtWidgets import QMessageBox
-from tabulate import tabulate
+#from tabulate import tabulate
 import matplotlib.pyplot as plt
 
 from mainwindow_ui import Ui_MainWindow
@@ -62,7 +63,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         # self.ui.pushButton_Fy_Fz.clicked.connect(plot_Fz_Fy)
         # self.ui.pushButton_normFy_Fz.clicked.connect(plot_norm_Fz_Fy)
         # self.ui.pushButton_Mx_Vtot.clicked.connect(plot_Mx_Vtot)
-        # 
+        #
         # #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
         self.ui.pushButton_getMembers.clicked.connect(load_memberlist_from_results)
@@ -93,7 +94,8 @@ def loaddata():
     global opendir
     global filename
     #filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
-    filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    #filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
     filepath = str(filepath)
     if not filepath == '':
         opendir = os.path.dirname(filepath)
@@ -104,7 +106,7 @@ def loaddata():
     global support_dict
     excel_data_df = pandas.read_excel(filepath, sheet_name='SUPPORTS')
     list_of_points = excel_data_df['Point'].drop_duplicates().tolist()
-    excel_data_df = excel_data_df.rename(columns={  'SumOfBuildingFX': 'FX', 
+    excel_data_df = excel_data_df.rename(columns={  'SumOfBuildingFX': 'FX',
                                                     'SumOfBuildingFY': 'FY',
                                                     'SumOfBuildingFZ': 'FZ',
                                                     'SumOfBuildingMX': 'MX',
@@ -218,11 +220,6 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
         report += str(point) + '\n'
         report += point.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
-    
-
-
-
-
 
 def show_report():
     if is_pointlist_empty():
@@ -241,7 +238,7 @@ def show_report():
     report += 'Fx Fy Fz Mx My Mz are Staad format member intenal forces\n'
     report += 'Force unit - %s, Moment unit - %s'%(unit_force, unit_moment)
     report += '\n\n'
-    
+
     if myapp.ui.checkBox_full.isChecked():
         report += 'STAAD format general table:\n'
         report += base_reaction_report(mlist) + '\n'
@@ -302,7 +299,7 @@ def set_title(info=''):
         myapp.setWindowTitle(version + ' - ' + info)
     else:
         myapp.setWindowTitle(version)
-    
+
 
 def info():
     about = '''
@@ -324,7 +321,7 @@ Check for lataest version: https://github.com/lukaszlaba/soco/releases
 
 if __name__ == '__main__':
 
-    
+
     app = QtWidgets.QApplication(sys.argv)
     myapp = MAINWINDOW()
     print_dialog = QPrintDialog()
@@ -335,7 +332,7 @@ if __name__ == '__main__':
     # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
     # myapp.ui.comboBox_preset.setCurrentIndex(3)
     myapp.show()
-    
+
     loaddata()
     s1 = support_dict[list(support_dict.keys())[0]]
     sys.exit(app.exec_())
