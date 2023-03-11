@@ -15,17 +15,18 @@ class support_respoint():
         if self.df.empty:
             return support_respoint(other.df.copy())
         #----
+        print('AAADDING')
         this = self.df.copy()
-        this.reset_index(inplace=True)
-        print(this)
+        this.reset_index(inplace=True, drop=True)
+        #print(this)
         other = other.df.copy()
-        other.reset_index(inplace=True)
-        print(other)
+        other.reset_index(inplace=True, drop=True)
+        #print(other)
         out = self.df.copy()
-        out.reset_index(inplace=True)
-        print(out)
+        out.reset_index(inplace=True, drop=True)
+        #print(out)
         for index, row in out.iterrows():
-            print (index)
+            #print (index)
             out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
             #----
             if out.at[index, 'Comb'] == 'E(E/W)':
@@ -38,23 +39,30 @@ class support_respoint():
         return support_respoint(out)
 
     def __mul__(self, other):
+        if self.df.empty:
+            self.df = other.df.copy()
         this = self.df.copy()
-        this.reset_index(inplace=True)
-        print(this)
+        this.reset_index(inplace=True, drop=True)
+        #print(this)
         other = other.df.copy()
-        other.reset_index(inplace=True)
-        print(other)
+        other.reset_index(inplace=True, drop=True)
+        #print(other)
         out = self.df.copy()
-        out.reset_index(inplace=True)
-        print(out)
+        out.reset_index(inplace=True, drop=True)
+        if not "Where" in out:
+            out["Where"] =  [{} for _ in range(len(out.index))]
+        #print(out)
+        # dodac kolimn skąd pochodzi max
         for index, row in out.iterrows():
-            print (index)
+            #print (index)
             out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
             #-----
             if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
-                out.at[index, 'FY'] = this.at[index, 'FY']
+                out.at[index, 'FX'] = this.at[index, 'FX']
             else:
-                out.at[index, 'FY'] = other.at[index, 'FY']
+                print (this.at[index, 'Point'], other.at[index, 'Point'], this.at[index, 'Comb'])
+                out.at[index, 'FX'] = other.at[index, 'FX']
+                out.at[index, 'Where']['FX'] = other.at[index, 'Point']
         #(..........)
         return support_respoint(out)
         
@@ -83,6 +91,8 @@ class support_respoint():
         if str(self.df['MX'].iloc[0]) != str(float("nan")) : to_get_list.append('MX')
         if str(self.df['MY'].iloc[0]) != str(float("nan")) : to_get_list.append('MY')
         if str(self.df['MZ'].iloc[0]) != str(float("nan")) : to_get_list.append('MZ')
+        if 'Where' in self.df:
+            to_get_list.append('Where')
         return self.df.loc[:,to_get_list]
 
     def __str__(self):

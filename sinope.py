@@ -94,8 +94,8 @@ def loaddata():
     global opendir
     global filename
     #filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
-    filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
-    #filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
+    #filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
     filepath = str(filepath)
     if not filepath == '':
         opendir = os.path.dirname(filepath)
@@ -224,10 +224,10 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
 def merged_reaction_report(filterlist=['AG01', 'AG05']):#<<<<<<<<<<<<<<<<<<<<<<<<HERE
     report = ''
     outpoint  = support_respoint()
-    if true: # opcja dodawanie
+    if False: # opcja dodawanie
         for i in filterlist:
             outpoint += support_dict[i]
-    if true:# opcja mnożenie
+    if True:# opcja mnożenie
         for i in filterlist:
             outpoint *= support_dict[i]
     report += str(outpoint) + '\n'
@@ -248,15 +248,17 @@ def show_report():
     report += 'Data source - ' + sourcefile + '\n'
     report += 'Results for  - ' + str(mlist)
     report += '\n\n'
-    report += 'Fx Fy Fz Mx My Mz are Staad format member intenal forces\n'
+    report += 'FX FY FZ MX MY MZ are PASS format reaction forces\n'
     report += 'Force unit - %s, Moment unit - %s'%(unit_force, unit_moment)
     report += '\n\n'
 
     if myapp.ui.checkBox_full.isChecked():
-        report += 'STAAD format general table:\n'
+        report += 'Pass format one by one from selected list table:\n'
         report += base_reaction_report(mlist) + '\n'
-        report += '\n'
 
+    report += 'The merged result for selcted\n'
+    report += merged_reaction_report(mlist) + '\n'
+    report += '\n'
     # report += 'Extreme cases list:\n'
     # report += get_extreme_force_table(mlist) + '\n'
     myapp.ui.textBrowser_output.setText(report)
@@ -348,9 +350,10 @@ if __name__ == '__main__':
 
     loaddata()
     s1 = support_dict[list(support_dict.keys())[0]]
-    s2 = support_dict[list(support_dict.keys())[1]]
-    s3 = support_dict[list(support_dict.keys())[2]]
-    s1+s2
+    s2 = support_dict[list(support_dict.keys())[4]]
+    s3 = support_dict[list(support_dict.keys())[12]]
+    s4 = support_dict[list(support_dict.keys())[13]]
+    s1+s2+s3+s4
     sys.exit(app.exec_())
 
 
