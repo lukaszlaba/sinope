@@ -10,6 +10,12 @@ class support_respoint():
 
     def __init__(self, data=pd.DataFrame({'A' : []})):
         self.df = data
+        # self.df['FX at'] = np.nan
+        # self.df['FY at'] = np.nan
+        # self.df['FZ at'] = np.nan
+        # self.df['MX at'] = np.nan
+        # self.df['MY at'] = np.nan
+        # self.df['MZ at'] = np.nan
         
     def __add__(self, other):
         if self.df.empty:
@@ -49,23 +55,38 @@ class support_respoint():
         #print(other)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
-        if not "Where" in out:
-            out["Where"] =  [{} for _ in range(len(out.index))]
-        #print(out)
-        # dodac kolimn skąd pochodzi max
+        if not "FX at" in out:
+            out['FX at'] = np.nan
+            out['FX at'] = np.nan
+            out['FY at'] = np.nan
+            out['FZ at'] = np.nan
+            out['MX at'] = np.nan
+            out['MY at'] = np.nan
+            out['MZ at'] = np.nan
+        #--
         for index, row in out.iterrows():
-            #print (index)
             out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
             #-----
             if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
                 out.at[index, 'FX'] = this.at[index, 'FX']
             else:
-                print (this.at[index, 'Point'], other.at[index, 'Point'], this.at[index, 'Comb'])
                 out.at[index, 'FX'] = other.at[index, 'FX']
-                out.at[index, 'Where']['FX'] = other.at[index, 'Point']
-        #(..........)
+                out.at[index, 'FX at'] = other.at[index, 'Point']
+            #-----
+            if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                out.at[index, 'FY'] = this.at[index, 'FY']
+            else:
+                out.at[index, 'FY'] = other.at[index, 'FY']
+                out.at[index, 'FY at'] = other.at[index, 'Point']
+            #-----
+            if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                out.at[index, 'FZ'] = this.at[index, 'FZ']
+            else:
+                out.at[index, 'FZ'] = other.at[index, 'FZ']
+                out.at[index, 'FZ at'] = other.at[index, 'Point']
+        #(......MI missed....)
         return support_respoint(out)
-        
+
     @property
     def Point(self):
         return self.df['Point'].iloc[0]
@@ -85,14 +106,31 @@ class support_respoint():
     @property
     def Bese_reactions(self):
         to_get_list = ['Comb']
-        if str(self.df['FX'].iloc[0]) != str(float("nan")) : to_get_list.append('FX')
-        if str(self.df['FY'].iloc[0]) != str(float("nan")) : to_get_list.append('FY')
-        if str(self.df['FZ'].iloc[0]) != str(float("nan")) : to_get_list.append('FZ')
-        if str(self.df['MX'].iloc[0]) != str(float("nan")) : to_get_list.append('MX')
-        if str(self.df['MY'].iloc[0]) != str(float("nan")) : to_get_list.append('MY')
-        if str(self.df['MZ'].iloc[0]) != str(float("nan")) : to_get_list.append('MZ')
-        if 'Where' in self.df:
-            to_get_list.append('Where')
+        
+        if str(self.df['FX'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FX')
+            if 'FX at' in self.df: to_get_list.append('FX at')
+
+        if str(self.df['FY'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FY')
+            if 'FY at' in self.df: to_get_list.append('FY at')
+
+        if str(self.df['FZ'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FZ')
+            if 'FZ at' in self.df: to_get_list.append('FZ at')
+        
+        if str(self.df['MX'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MX')
+            if 'MX at' in self.df: to_get_list.append('MX at')
+        
+        if str(self.df['MY'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MY')
+            if 'MY at' in self.df: to_get_list.append('MY at')
+        
+        if str(self.df['MZ'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MZ')
+            if 'MZ at' in self.df: to_get_list.append('MZ at')
+        
         return self.df.loc[:,to_get_list]
 
     def __str__(self):

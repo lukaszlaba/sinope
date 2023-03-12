@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>180</x>
-      <y>70</y>
+      <y>130</y>
       <width>1111</width>
-      <height>741</height>
+      <height>681</height>
      </rect>
     </property>
     <property name="font">
@@ -129,8 +129,8 @@ AG5</string>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>10</y>
+      <x>190</x>
+      <y>90</y>
       <width>291</width>
       <height>31</height>
      </rect>
@@ -271,8 +271,8 @@ AG5</string>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>491</x>
-      <y>11</y>
+      <x>510</x>
+      <y>20</y>
       <width>29</width>
       <height>20</height>
      </rect>
@@ -281,24 +281,11 @@ AG5</string>
      <string>Plot:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_Fx_My">
-    <property name="geometry">
-     <rect>
-      <x>527</x>
-      <y>11</y>
-      <width>93</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string> Fx-My</string>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="checkBox_pltAnnot">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>10</y>
+      <x>900</x>
+      <y>20</y>
       <width>127</width>
       <height>24</height>
      </rect>
@@ -308,6 +295,65 @@ AG5</string>
     </property>
     <property name="checked">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_pltComb">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>20</y>
+      <width>131</width>
+      <height>26</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_pltForces">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>20</y>
+      <width>93</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3D forces</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_pltMoments">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>20</y>
+      <width>101</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>3D moments</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_method">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>50</y>
+      <width>181</width>
+      <height>26</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>50</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select method:</string>
     </property>
    </widget>
   </widget>

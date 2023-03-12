@@ -56,31 +56,18 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         #--
         self.ui.pushButton_Report.clicked.connect(show_report)
         # #--
-        # self.ui.pushButton_Fx_My.clicked.connect(plot_Fx_My)
-        # self.ui.pushButton_Fx_Mz.clicked.connect(plot_Fx_Mz)
-        # self.ui.pushButton_Fx_Mtot.clicked.connect(plot_Fx_Mtot)
-        # self.ui.pushButton_My_Mz.clicked.connect(plot_Mz_My)
-        # self.ui.pushButton_Fy_Fz.clicked.connect(plot_Fz_Fy)
-        # self.ui.pushButton_normFy_Fz.clicked.connect(plot_norm_Fz_Fy)
-        # self.ui.pushButton_Mx_Vtot.clicked.connect(plot_Mx_Vtot)
+        self.ui.pushButton_pltForces.clicked.connect(plot_forces)
         #
         # #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
         self.ui.pushButton_getMembers.clicked.connect(load_memberlist_from_results)
         self.ui.pushButton_find_by_type.clicked.connect(find_by_types)
-        # self.ui.pushButton_makej.clicked.connect(makej)
-        # self.ui.pushButton_makeij.clicked.connect(makeij)
-        # self.ui.pushButton_staad_show.clicked.connect(show_in_staad)
         self.ui.pushButton_check.clicked.connect(check_pointlist)
         # #--
         self.ui.pushButton_load.clicked.connect(loaddata)
-        # self.ui.pushButton_clbMembers.clicked.connect(clbMembers)
-        # self.ui.pushButton_clbNodes.clicked.connect(clbNodes)
         # #--
-        # self.ui.comboBox_preset.currentIndexChanged.connect(set_preset_content)
-        # #--
-        # self.ui.pushButton_info.clicked.connect(info)
-        # self.ui.pushButton_print.clicked.connect(print_report)
+        self.ui.pushButton_info.clicked.connect(info)
+        self.ui.pushButton_print.clicked.connect(print_report)
 
 opendir = os.path.dirname(__file__)#dir path for save and open
 filename = None
@@ -94,8 +81,8 @@ def loaddata():
     global opendir
     global filename
     #filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
-    #filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
-    filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
+    filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    #filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
     filepath = str(filepath)
     if not filepath == '':
         opendir = os.path.dirname(filepath)
@@ -123,6 +110,9 @@ def loaddata():
     #---pushing supports types to combobox
     point_types = excel_data_df['Type'].drop_duplicates().tolist()
     myapp.ui.comboBox_Type.addItems(point_types)
+    #---pushing combination mames to combobox
+    point_types = excel_data_df['Comb'].drop_duplicates().tolist()
+    myapp.ui.comboBox_pltComb.addItems(point_types)
     #---adding filename to app window title
     set_title(filename)
     #--geting units TODO
@@ -221,7 +211,7 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
         report += point.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
 
-def merged_reaction_report(filterlist=['AG01', 'AG05']):#<<<<<<<<<<<<<<<<<<<<<<<<HERE
+def merged_reaction_report(filterlist=['AG01', 'AG05']):
     report = ''
     outpoint  = support_respoint()
     if False: # opcja dodawanie
@@ -255,7 +245,7 @@ def show_report():
     if myapp.ui.checkBox_full.isChecked():
         report += 'Pass format one by one from selected list table:\n'
         report += base_reaction_report(mlist) + '\n'
-
+    # checking what type of summary selected
     report += 'The merged result for selcted\n'
     report += merged_reaction_report(mlist) + '\n'
     report += '\n'
@@ -265,45 +255,24 @@ def show_report():
 
 #-----------------------------------------------------------
 
-def plot_Fx_My():
-    if is_pointlist_empty():
-        check_pointlist()
-        return None
-    if not data_for_pointlist_exist():
-        check_pointlist()
-        return None
-    #------
-    mlist = get_pointlist()
-    #-
-    X=[]
-    Y=[]
-    annotations=[]
-    for i in mlist:
-        X += support_dict[i].Fxlist
-        Y += support_dict[i].Mylist
-        annotations += [support_dict[i].numberlist[j] + ' LC' + support_dict[i].LClist[j] for j in range(0, len(support_dict[i].numberlist))]
-    #-
-    plt.figure(figsize=(8,6))
-    plt.scatter(X,Y,s=50,color="blue")
-    #-
-    if myapp.ui.checkBox_pltAnnot.isChecked():
-        for i, label in enumerate(annotations):
-            plt.text(X[i], Y[i],'   '+label, fontsize=7)
-    plt.grid()
-    #-
-    plt.title("Fx-My", fontsize=15)
-    plt.xlabel("Fx " + unit_force)
-    plt.ylabel("My " + unit_moment)
-    limx = 1.1*max(abs(max(X)),abs(min(X)))
-    limy = 1.1*max(abs(max(Y)),abs(min(Y)))
-    plt.xlim([-limx, limx])
-    plt.ylim([-limy, limy])
-    #-
+def plot_forces():
+    #You need to use Axes3D from mplot3d in mpl_toolkits, then set the subplot projection to 3d:
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    import numpy as np
+    soa = np.array([[0, 0, 0, 1, -2, 2], [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 2, 1, -4], [0, 0, 0, 0.5, 0.7, 0]])
+    X, Y, Z, U, V, W = zip(*soa)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.quiver(X, Y, Z, U, V, W)
+    ax.set_xlim([-5, 5])
+    ax.set_ylim([-5, 5])
+    ax.set_zlim([-5, 5])
     plt.show()
 
-
-
-
+def plot_moments():
+    plot_forces()
 
 def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
@@ -318,7 +287,7 @@ def set_title(info=''):
 
 def info():
     about = '''
-Soco - Staad member result extract tool
+Sinope - J-MEPCon stress pipe reaction analysis app
 Alpha stage software for testing only
 
 -------------Licence-------------
@@ -328,7 +297,7 @@ Soco is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU General Public License along with Soco; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
-Copyright (C) 2022 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
+Copyright (C) 2023 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
 Project website: https://github.com/lukaszlaba/soco
 Check for lataest version: https://github.com/lukaszlaba/soco/releases
 '''
@@ -345,6 +314,9 @@ if __name__ == '__main__':
     # myapp.ui.plainTextEdit_serch.clear()
     # myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     # # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
+    myapp.ui.comboBox_method.addItems(['keep separeted'])
+    myapp.ui.comboBox_method.addItems(['summ in to one'])
+    myapp.ui.comboBox_method.addItems(['one replacement'])
     # # myapp.ui.comboBox_preset.setCurrentIndex(3)
     myapp.show()
 
@@ -357,7 +329,8 @@ if __name__ == '__main__':
     sys.exit(app.exec_())
 
 
-'''
-command used to frozening with pyinstaller
-pyinstaller --onefile --noconsole --icon=app.ico ..\soco.py
-'''
+#command used to frozening with pyinstaller
+#pyinstaller --onefile --noconsole --icon=app.ico ..\soco.py
+
+#cd C:\Users\Lenovo\python_wip\myenv\env_sinope\Scripts
+#pyuic5 C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow.ui > C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow_ui.py
