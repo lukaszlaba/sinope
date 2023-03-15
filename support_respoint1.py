@@ -8,40 +8,66 @@ from utils import find_max, find_min, find_maxabs
 
 class support_respoint():
 
+    __MERGE_METHOD = 'max' # or min or abs
+    
+    def switch_merge_method_to_max():
+        support_respoint.__MERGE_METHOD = 'max'
+
+    def switch_merge_method_to_min():
+        support_respoint.__MERGE_METHOD = 'min'
+
+    def switch_merge_method_to_abs():
+        support_respoint.__MERGE_METHOD = 'abs'
+        
+    #-------
+    
     def __init__(self, data=pd.DataFrame({'A' : []})):
         self.df = data
-        # self.df['FX at'] = np.nan
-        # self.df['FY at'] = np.nan
-        # self.df['FZ at'] = np.nan
-        # self.df['MX at'] = np.nan
-        # self.df['MY at'] = np.nan
-        # self.df['MZ at'] = np.nan
         
     def __add__(self, other):
         if self.df.empty:
             return support_respoint(other.df.copy())
         #----
-        print('AAADDING')
         this = self.df.copy()
         this.reset_index(inplace=True, drop=True)
-        #print(this)
         other = other.df.copy()
         other.reset_index(inplace=True, drop=True)
-        #print(other)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
-        #print(out)
-        for index, row in out.iterrows():
-            #print (index)
-            out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
-            #----
-            if out.at[index, 'Comb'] == 'E(E/W)':
-                out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
-                out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
-            else:
-                out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
-                out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
-        #(.....!!!.....)
+        if self.merge_method_is_max():
+            for index, row in out.iterrows():
+                #print (index)
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] == 'E(E/W)':
+                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                else:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+        if self.merge_method_is_min():
+            for index, row in out.iterrows():
+                #print (index)
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] == 'E(E/W)':
+                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                else:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+        if self.merge_method_is_abs():
+            for index, row in out.iterrows():
+                #print (index)
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] == 'E(E/W)':
+                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                else:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+        #(......MI missed....)
         return support_respoint(out)
 
     def __mul__(self, other):
@@ -49,10 +75,8 @@ class support_respoint():
             self.df = other.df.copy()
         this = self.df.copy()
         this.reset_index(inplace=True, drop=True)
-        #print(this)
         other = other.df.copy()
         other.reset_index(inplace=True, drop=True)
-        #print(other)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
         if not "FX at" in out:
@@ -64,26 +88,80 @@ class support_respoint():
             out['MY at'] = np.nan
             out['MZ at'] = np.nan
         #--
-        for index, row in out.iterrows():
-            out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
-            #-----
-            if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
-                out.at[index, 'FX'] = this.at[index, 'FX']
-            else:
-                out.at[index, 'FX'] = other.at[index, 'FX']
-                out.at[index, 'FX at'] = other.at[index, 'Point']
-            #-----
-            if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
-                out.at[index, 'FY'] = this.at[index, 'FY']
-            else:
-                out.at[index, 'FY'] = other.at[index, 'FY']
-                out.at[index, 'FY at'] = other.at[index, 'Point']
-            #-----
-            if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
-                out.at[index, 'FZ'] = this.at[index, 'FZ']
-            else:
-                out.at[index, 'FZ'] = other.at[index, 'FZ']
-                out.at[index, 'FZ at'] = other.at[index, 'Point']
+        if self.merge_method_is_max():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                #-----
+                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                    out.at[index, 'FX'] = this.at[index, 'FX']
+                else:
+                    out.at[index, 'FX'] = other.at[index, 'FX']
+                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                #-----
+                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                    out.at[index, 'FY'] = this.at[index, 'FY']
+                else:
+                    out.at[index, 'FY'] = other.at[index, 'FY']
+                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                #-----
+                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                    out.at[index, 'FZ'] = this.at[index, 'FZ']
+                else:
+                    out.at[index, 'FZ'] = other.at[index, 'FZ']
+                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #--
+        if self.merge_method_is_min():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                #-----
+                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                    out.at[index, 'FX'] = this.at[index, 'FX']
+                else:
+                    out.at[index, 'FX'] = other.at[index, 'FX']
+                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                #-----
+                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                    out.at[index, 'FY'] = this.at[index, 'FY']
+                else:
+                    out.at[index, 'FY'] = other.at[index, 'FY']
+                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                #-----
+                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                    out.at[index, 'FZ'] = this.at[index, 'FZ']
+                else:
+                    out.at[index, 'FZ'] = other.at[index, 'FZ']
+                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #--
+        if self.merge_method_is_abs():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                #-----
+                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                    out.at[index, 'FX'] = this.at[index, 'FX']
+                else:
+                    out.at[index, 'FX'] = other.at[index, 'FX']
+                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                #-----
+                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                    out.at[index, 'FY'] = this.at[index, 'FY']
+                else:
+                    out.at[index, 'FY'] = other.at[index, 'FY']
+                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                #-----
+                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                    out.at[index, 'FZ'] = this.at[index, 'FZ']
+                else:
+                    out.at[index, 'FZ'] = other.at[index, 'FZ']
+                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
         #(......MI missed....)
         return support_respoint(out)
 
@@ -106,32 +184,63 @@ class support_respoint():
     @property
     def Bese_reactions(self):
         to_get_list = ['Comb']
-        
+        #----
         if str(self.df['FX'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('FX')
-            if 'FX at' in self.df: to_get_list.append('FX at')
 
         if str(self.df['FY'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('FY')
-            if 'FY at' in self.df: to_get_list.append('FY at')
 
         if str(self.df['FZ'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('FZ')
-            if 'FZ at' in self.df: to_get_list.append('FZ at')
         
         if str(self.df['MX'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('MX')
-            if 'MX at' in self.df: to_get_list.append('MX at')
         
         if str(self.df['MY'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('MY')
-            if 'MY at' in self.df: to_get_list.append('MY at')
         
         if str(self.df['MZ'].iloc[0]) != str(float("nan")) : 
             to_get_list.append('MZ')
-            if 'MZ at' in self.df: to_get_list.append('MZ at')
+            
+        #-------
+        if 'FX' in to_get_list:
+            if 'FX at' in self.df: to_get_list.append('FX at')
+
+        if 'FY' in to_get_list:
+            if 'FY at' in self.df: to_get_list.append('FY at')
+
+        if 'FZ' in to_get_list:
+            if 'FZ at' in self.df: to_get_list.append('FZ at')
         
+        if 'MX' in to_get_list:
+            if 'MX at' in self.df: to_get_list.append('MX at')
+        
+        if 'MY' in to_get_list:
+            if 'MY at' in self.df: to_get_list.append('MY at')
+        
+        if 'MZ' in to_get_list:
+            if 'MZ at' in self.df: to_get_list.append('MZ at')
+        #----
         return self.df.loc[:,to_get_list]
+        
+    def merge_method_is_max(self):
+        if support_respoint.__MERGE_METHOD == 'max':
+            return True
+        else:
+            return False
+
+    def merge_method_is_min(self):
+        if support_respoint.__MERGE_METHOD == 'min':
+            return True
+        else:
+            return False
+
+    def merge_method_is_abs(self):
+        if support_respoint.__MERGE_METHOD == '':
+            return True
+        else:
+            return False
 
     def __str__(self):
         return self.Point + ',' + self.Type

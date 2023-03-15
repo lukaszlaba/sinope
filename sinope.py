@@ -57,6 +57,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_Report.clicked.connect(show_report)
         # #--
         self.ui.pushButton_pltForces.clicked.connect(plot_forces)
+        self.ui.pushButton_pltMoments.clicked.connect(plot_moments)
         #
         # #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
@@ -211,18 +212,27 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
         report += point.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
 
-def merged_reaction_report(filterlist=['AG01', 'AG05']):
+def merged_summ_reaction_report(filterlist=['AG01', 'AG05']):
     report = ''
     outpoint  = support_respoint()
-    if False: # opcja dodawanie
-        for i in filterlist:
-            outpoint += support_dict[i]
-    if True:# opcja mnożenie
-        for i in filterlist:
-            outpoint *= support_dict[i]
+    for i in filterlist:
+        outpoint += support_dict[i]
     report += str(outpoint) + '\n'
     report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
+
+def merged_replacement_reaction_report(filterlist=['AG01', 'AG05']):
+    report = ''
+    outpoint  = support_respoint()
+    for i in filterlist:
+        outpoint *= support_dict[i]
+    report += str(outpoint) + '\n'
+    report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
+    return report
+
+def join_min_max (p1, p2): #<<<<------------HERE
+    #....
+    return p1.Bese_reactions.round().to_string(index=False)
 
 def show_report():
     if is_pointlist_empty():
@@ -242,14 +252,18 @@ def show_report():
     report += 'Force unit - %s, Moment unit - %s'%(unit_force, unit_moment)
     report += '\n\n'
 
-    if myapp.ui.checkBox_full.isChecked():
+    if myapp.ui.checkBox_full.isChecked() or myapp.ui.comboBox_method.currentText() == 'keep separeted':
         report += 'Pass format one by one from selected list table:\n'
         report += base_reaction_report(mlist) + '\n'
     # checking what type of summary selected
-    report += 'The merged result for selcted\n'
-    report += merged_reaction_report(mlist) + '\n'
-    report += '\n'
-    # report += 'Extreme cases list:\n'
+    if myapp.ui.comboBox_method.currentText() == 'summ in to one':
+        report += 'The merged result for selcted\n'
+        report += merged_summ_reaction_report(mlist) + '\n'
+        report += '\n'
+    if myapp.ui.comboBox_method.currentText() == 'one replacement':
+        report += 'The merged result for selcted\n'
+        report += merged_replacement_reaction_report(mlist) + '\n'
+        report += '\n'    # report += 'Extreme cases list:\n'
     # report += get_extreme_force_table(mlist) + '\n'
     myapp.ui.textBrowser_output.setText(report)
 
