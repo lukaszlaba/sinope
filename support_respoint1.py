@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 from utils import find_max, find_min, find_maxabs
 
+
+sign_no_respect_combo_list = ['E(N/S)', 'E(E/W)', 'W(N/S)', 'W(E/W)']
+
 class support_respoint():
 
     __MERGE_METHOD = 'max' # or min or abs
@@ -18,12 +21,15 @@ class support_respoint():
 
     def switch_merge_method_to_abs():
         support_respoint.__MERGE_METHOD = 'abs'
+
+    def switch_merge_method_to_direct():
+        support_respoint.__MERGE_METHOD = 'direct'
         
     #-------
     
     def __init__(self, data=pd.DataFrame({'A' : []})):
         self.df = data
-        
+
     def __add__(self, other):
         if self.df.empty:
             return support_respoint(other.df.copy())
@@ -34,40 +40,76 @@ class support_respoint():
         other.reset_index(inplace=True, drop=True)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
+        #----------------------------------------------------
         if self.merge_method_is_max():
+            print('max')
             for index, row in out.iterrows():
-                #print (index)
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
                 #----
-                if out.at[index, 'Comb'] == 'E(E/W)':
-                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
-                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
-                else:
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    print(out.at[index, 'Comb'])
                     out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
                     out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:
+                    out.at[index, 'FX'] = max(0, this.at[index, 'FX'], this.at[index, 'FX'] + other.at[index, 'FX'])
+                    out.at[index, 'FY'] = max(0, this.at[index, 'FY'], this.at[index, 'FY'] + other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = max(0, this.at[index, 'FZ'], this.at[index, 'FZ'] + other.at[index, 'FZ'])
+        #----------------------------------------------------
         if self.merge_method_is_min():
+            print('min')
             for index, row in out.iterrows():
-                #print (index)
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
                 #----
-                if out.at[index, 'Comb'] == 'E(E/W)':
-                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
-                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    out.at[index, 'FX'] = - abs(this.at[index, 'FX']) - abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = - abs(this.at[index, 'FY']) - abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = - abs(this.at[index, 'FZ']) - abs(other.at[index, 'FZ'])
                 else:
-                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
-                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FX'] = min(0, this.at[index, 'FX'], this.at[index, 'FX'] + other.at[index, 'FX'])
+                    out.at[index, 'FY'] = min(0, this.at[index, 'FY'], this.at[index, 'FY'] + other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = min(0, this.at[index, 'FZ'], this.at[index, 'FZ'] + other.at[index, 'FZ'])
+        #----------------------------------------------------            
         if self.merge_method_is_abs():
+            print('abs')
             for index, row in out.iterrows():
-                #print (index)
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
                 #----
-                if out.at[index, 'Comb'] == 'E(E/W)':
-                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
-                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
-                else:
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
                     out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
                     out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
-        #(......MI missed....)
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:   
+                               
+                    if abs(this.at[index, 'FX']) > abs(this.at[index, 'FX'] + other.at[index, 'FX']):
+                        out.at[index, 'FX'] = this.at[index, 'FX']
+                    else:
+                        out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+
+                    if abs(this.at[index, 'FY']) > abs(this.at[index, 'FY'] + other.at[index, 'FY']):
+                        out.at[index, 'FY'] = this.at[index, 'FY']
+                    else:
+                        out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+
+                    if abs(this.at[index, 'FZ']) > abs(this.at[index, 'FZ'] + other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = this.at[index, 'FZ']
+                    else:
+                        out.at[index, 'FZ'] = this.at[index, 'FZ'] + other.at[index, 'FZ']                                            
+        #----------------------------------------------------
+        if self.merge_method_is_direct():
+            print('direct')
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:
+                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                    out.at[index, 'FZ'] = this.at[index, 'FZ'] + other.at[index, 'FZ']
+        #!!!!!!!!!!!!!!!!!!!!!!!!MI missed
         return support_respoint(out)
 
     def __mul__(self, other):
@@ -87,57 +129,101 @@ class support_respoint():
             out['MX at'] = np.nan
             out['MY at'] = np.nan
             out['MZ at'] = np.nan
-        #--
+        #----------------------------------------------------
         if self.merge_method_is_max():
             for index, row in out.iterrows():
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
-                #-----
-                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
-                    out.at[index, 'FX'] = this.at[index, 'FX']
-                else:
-                    out.at[index, 'FX'] = other.at[index, 'FX']
-                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                        out.at[index, 'FX'] = abs(this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = abs(other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
                     if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
-                #-----
-                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
-                    out.at[index, 'FY'] = this.at[index, 'FY']
-                else:
-                    out.at[index, 'FY'] = other.at[index, 'FY']
-                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                    #-----
+                    if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                        out.at[index, 'FY'] = abs(this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = abs(other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
                     if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
-                #-----
-                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
-                    out.at[index, 'FZ'] = this.at[index, 'FZ']
-                else:
-                    out.at[index, 'FZ'] = other.at[index, 'FZ']
-                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    #-----
+                    if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = abs(this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = abs(other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
                     if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
-        #--
+                else:
+                    if this.at[index, 'FX'] > other.at[index, 'FX']:
+                        out.at[index, 'FX'] = max(0, this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = max(0, other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if this.at[index, 'FY'] > other.at[index, 'FY']:
+                        out.at[index, 'FY'] = max(0, this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = max(0, other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if this.at[index, 'FZ'] > other.at[index, 'FZ']:
+                        out.at[index, 'FZ'] = max(0, this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = max(0, other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'                    
+        #----------------------------------------------------
         if self.merge_method_is_min():
             for index, row in out.iterrows():
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
-                #-----
-                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
-                    out.at[index, 'FX'] = this.at[index, 'FX']
-                else:
-                    out.at[index, 'FX'] = other.at[index, 'FX']
-                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                        out.at[index, 'FX'] = -abs(this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = -abs(other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
                     if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
-                #-----
-                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
-                    out.at[index, 'FY'] = this.at[index, 'FY']
-                else:
-                    out.at[index, 'FY'] = other.at[index, 'FY']
-                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                    #-----
+                    if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                        out.at[index, 'FY'] = -abs(this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = -abs(other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
                     if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
-                #-----
-                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
-                    out.at[index, 'FZ'] = this.at[index, 'FZ']
-                else:
-                    out.at[index, 'FZ'] = other.at[index, 'FZ']
-                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    #-----
+                    if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = -abs(this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = -abs(other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
                     if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
-        #--
+                else:
+                    if this.at[index, 'FX'] < other.at[index, 'FX']:
+                        out.at[index, 'FX'] = min(0, this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = min(0, other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if this.at[index, 'FY'] < other.at[index, 'FY']:
+                        out.at[index, 'FY'] = min(0, this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = min(0, other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if this.at[index, 'FZ'] < other.at[index, 'FZ']:
+                        out.at[index, 'FZ'] = min(0, this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = min(0, other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #----------------------------------------------------
         if self.merge_method_is_abs():
             for index, row in out.iterrows():
                 out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
@@ -147,22 +233,22 @@ class support_respoint():
                 else:
                     out.at[index, 'FX'] = other.at[index, 'FX']
                     out.at[index, 'FX at'] = other.at[index, 'Point']
-                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
                 #-----
                 if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
                     out.at[index, 'FY'] = this.at[index, 'FY']
                 else:
                     out.at[index, 'FY'] = other.at[index, 'FY']
                     out.at[index, 'FY at'] = other.at[index, 'Point']
-                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
                 #-----
                 if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
                     out.at[index, 'FZ'] = this.at[index, 'FZ']
                 else:
                     out.at[index, 'FZ'] = other.at[index, 'FZ']
                     out.at[index, 'FZ at'] = other.at[index, 'Point']
-                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
-        #(......MI missed....)
+                if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!MI missed
         return support_respoint(out)
 
     @property
@@ -237,7 +323,13 @@ class support_respoint():
             return False
 
     def merge_method_is_abs(self):
-        if support_respoint.__MERGE_METHOD == '':
+        if support_respoint.__MERGE_METHOD == 'abs':
+            return True
+        else:
+            return False
+
+    def merge_method_is_direct(self):
+        if support_respoint.__MERGE_METHOD == 'direct':
             return True
         else:
             return False

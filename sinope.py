@@ -56,8 +56,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         #--
         self.ui.pushButton_Report.clicked.connect(show_report)
         # #--
-        self.ui.pushButton_pltForces.clicked.connect(plot_forces)
-        self.ui.pushButton_pltMoments.clicked.connect(plot_moments)
+        self.ui.pushButton_plt_show.clicked.connect(plot3D)
         #
         # #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
@@ -66,9 +65,12 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_check.clicked.connect(check_pointlist)
         # #--
         self.ui.pushButton_load.clicked.connect(loaddata)
-        # #--
+        #--
         self.ui.pushButton_info.clicked.connect(info)
         self.ui.pushButton_print.clicked.connect(print_report)
+        #--
+        self.ui.comboBox_method.currentIndexChanged.connect(ui_update)
+
 
 opendir = os.path.dirname(__file__)#dir path for save and open
 filename = None
@@ -76,6 +78,25 @@ filename = None
 support_dict = {}
 excel_data_df = None
 
+def ui_update():
+    if myapp.ui.comboBox_method.currentIndex() == 0:
+        myapp.ui.comboBox_method_value.setDisabled(True)
+    else:
+        myapp.ui.comboBox_method_value.setDisabled(False)
+    #---
+    if myapp.ui.comboBox_method.currentIndex() == 2:
+        myapp.ui.comboBox_method_value.clear()
+        myapp.ui.comboBox_method_value.addItems(['env+'])
+        myapp.ui.comboBox_method_value.addItems(['env-'])
+        myapp.ui.comboBox_method_value.addItems(['env+/-'])
+        myapp.ui.comboBox_method_value.addItems(['max_abs'])
+    else:
+        myapp.ui.comboBox_method_value.clear()
+        myapp.ui.comboBox_method_value.addItems(['env+'])
+        myapp.ui.comboBox_method_value.addItems(['env-'])
+        myapp.ui.comboBox_method_value.addItems(['env+/-'])
+        myapp.ui.comboBox_method_value.addItems(['max_abs'])
+        myapp.ui.comboBox_method_value.addItems(['direct_summ'])
 
 def loaddata():
     #---asking for filename
@@ -113,7 +134,7 @@ def loaddata():
     myapp.ui.comboBox_Type.addItems(point_types)
     #---pushing combination mames to combobox
     point_types = excel_data_df['Comb'].drop_duplicates().tolist()
-    myapp.ui.comboBox_pltComb.addItems(point_types)
+    myapp.ui.comboBox_plt_comb.addItems(point_types)
     #---adding filename to app window title
     set_title(filename)
     #--geting units TODO
@@ -209,30 +230,100 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
     for i in filterlist:
         point = support_dict[i]
         report += str(point) + '\n'
-        report += point.Bese_reactions.round().to_string(index=False) + '\n\n'
+        report += point.Bese_reactions.round(2).to_string(index=False) + '\n\n'
     return report
 
 def merged_summ_reaction_report(filterlist=['AG01', 'AG05']):
-    report = ''
-    outpoint  = support_respoint()
-    for i in filterlist:
-        outpoint += support_dict[i]
-    report += str(outpoint) + '\n'
-    report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
+    if myapp.ui.comboBox_method_value.currentText() == 'env-': support_respoint.switch_merge_method_to_min()
+    if myapp.ui.comboBox_method_value.currentText() == 'env+': support_respoint.switch_merge_method_to_max()
+    if myapp.ui.comboBox_method_value.currentText() == 'max_abs': support_respoint.switch_merge_method_to_abs()
+    if myapp.ui.comboBox_method_value.currentText() == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    #---------------
+    if myapp.ui.comboBox_method_value.currentText() == 'env+/-':
+        #min option
+        support_respoint.switch_merge_method_to_min()
+        outpoint_min  = support_respoint()
+        for i in filterlist:
+            outpoint_min += support_dict[i]
+        #max option
+        support_respoint.switch_merge_method_to_max()
+        outpoint_max  = support_respoint()
+        for i in filterlist:
+            outpoint_max += support_dict[i]
+        report = 'MIN-MAX' + '\n'
+        report += join_min_max(outpoint_min, outpoint_max) + '\n\n'
+    else:
+        report = ''
+        outpoint  = support_respoint()
+        for i in filterlist:
+            outpoint += support_dict[i]
+        report += str(outpoint) + '\n'
+        report += outpoint.Bese_reactions.round(2).to_string(index=False) + '\n\n'
     return report
 
 def merged_replacement_reaction_report(filterlist=['AG01', 'AG05']):
-    report = ''
-    outpoint  = support_respoint()
-    for i in filterlist:
-        outpoint *= support_dict[i]
-    report += str(outpoint) + '\n'
-    report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
+    if myapp.ui.comboBox_method_value.currentText() == 'env-': support_respoint.switch_merge_method_to_min()
+    if myapp.ui.comboBox_method_value.currentText() == 'env+': support_respoint.switch_merge_method_to_max()
+    if myapp.ui.comboBox_method_value.currentText() == 'max_abs': support_respoint.switch_merge_method_to_abs()
+    if myapp.ui.comboBox_method_value.currentText() == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    #---------------
+    if myapp.ui.comboBox_method_value.currentText() == 'env+/-':
+        #min option
+        support_respoint.switch_merge_method_to_min()
+        outpoint_min  = support_respoint()
+        for i in filterlist:
+            outpoint_min *= support_dict[i]
+        #max option
+        support_respoint.switch_merge_method_to_max()
+        outpoint_max  = support_respoint()
+        for i in filterlist:
+            outpoint_max *= support_dict[i]
+        report = 'MIN-MAX' + '\n'
+        report += join_min_max(outpoint_min, outpoint_max) + '\n\n'
+    else:
+        report = ''
+        outpoint  = support_respoint()
+        for i in filterlist:
+            outpoint *= support_dict[i]
+        report += str(outpoint) + '\n'
+        report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
     return report
 
-def join_min_max (p1, p2): #<<<<------------HERE
+def join_min_max (p_min, p_max):
+    min_df = p_min.df.copy()
+    min_df.reset_index(inplace=True, drop=True)
+    max_df = p_max.df.copy()
+    max_df.reset_index(inplace=True, drop=True)
+    out_df = p_min.df.copy()
+    out_df.reset_index(inplace=True, drop=True)
+    for index, row in out_df.iterrows():
+        if min_df.at[index, 'FX'] != max_df.at[index, 'FX']:
+            out_df.at[index, 'FX'] = '[' + str(min_df.at[index, 'FX'].round()) + '..' + str(max_df.at[index, 'FX'].round()) + ']'
+        else:
+            out_df.at[index, 'FX'] = str(min_df.at[index, 'FX'].round())
+
+        if min_df.at[index, 'FY'] != max_df.at[index, 'FY']:
+            out_df.at[index, 'FY'] = '[' + str(min_df.at[index, 'FY'].round()) + '..' + str(max_df.at[index, 'FY'].round()) + ']'
+        else:
+            out_df.at[index, 'FY'] = str(min_df.at[index, 'FY'].round())
+
+        if min_df.at[index, 'FZ'] != max_df.at[index, 'FZ']:
+            out_df.at[index, 'FZ'] = '[' + str(min_df.at[index, 'FZ'].round()) + '..' + str(max_df.at[index, 'FZ'].round()) + ']'
+        else:
+            out_df.at[index, 'FZ'] = str(min_df.at[index, 'FZ'].round())
+        #---
+        if 'FX at' in out_df:
+            out_df.at[index, 'FX at'] = '[' + min_df.at[index, 'FX at'] + '..' + max_df.at[index, 'FX at'] + ']'
+            out_df.at[index, 'FX at'] = out_df.at[index, 'FX at'].replace('[-..-]', '-')
+        if 'FX at' in out_df:
+            out_df.at[index, 'FY at'] = '[' + min_df.at[index, 'FY at'] + '..' + max_df.at[index, 'FY at'] + ']'
+            out_df.at[index, 'FY at'] = out_df.at[index, 'FY at'].replace('[-..-]', '-')
+        if 'FX at' in out_df:
+            out_df.at[index, 'FZ at'] = '[' + min_df.at[index, 'FZ at'] + '..' + max_df.at[index, 'FZ at'] + ']'
+            out_df.at[index, 'FZ at'] = out_df.at[index, 'FZ at'].replace('[-..-]', '-')
     #....
-    return p1.Bese_reactions.round().to_string(index=False)
+    out_p = support_respoint(out_df)
+    return out_p.Bese_reactions.round().to_string(index=False)
 
 def show_report():
     if is_pointlist_empty():
@@ -251,7 +342,7 @@ def show_report():
     report += 'FX FY FZ MX MY MZ are PASS format reaction forces\n'
     report += 'Force unit - %s, Moment unit - %s'%(unit_force, unit_moment)
     report += '\n\n'
-
+    #------------------
     if myapp.ui.checkBox_full.isChecked() or myapp.ui.comboBox_method.currentText() == 'keep separeted':
         report += 'Pass format one by one from selected list table:\n'
         report += base_reaction_report(mlist) + '\n'
@@ -264,16 +355,25 @@ def show_report():
         report += 'The merged result for selcted\n'
         report += merged_replacement_reaction_report(mlist) + '\n'
         report += '\n'    # report += 'Extreme cases list:\n'
-    # report += get_extreme_force_table(mlist) + '\n'
     myapp.ui.textBrowser_output.setText(report)
 
 #-----------------------------------------------------------
 
-def plot_forces():
+def plot3D():
     #You need to use Axes3D from mplot3d in mpl_toolkits, then set the subplot projection to 3d:
+
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     import numpy as np
+    #-----
+    if myapp.ui.comboBox_plt_mf.currentText() == 'force':
+        to_plot = ['FX', 'FY', 'FZ']
+    if myapp.ui.comboBox_plt_mf.currentText() == 'moment':
+        to_plot = ['MX', 'MY', 'MZ']
+    comb = myapp.ui.comboBox_plt_comb.currentText()
+    #-----
+
+    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<HERE
     soa = np.array([[0, 0, 0, 1, -2, 2], [0, 0, 0, 1, 1, 0],
                     [0, 0, 0, 2, 1, -4], [0, 0, 0, 0.5, 0.7, 0]])
     X, Y, Z, U, V, W = zip(*soa)
@@ -284,9 +384,6 @@ def plot_forces():
     ax.set_ylim([-5, 5])
     ax.set_zlim([-5, 5])
     plt.show()
-
-def plot_moments():
-    plot_forces()
 
 def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
@@ -322,24 +419,24 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     myapp = MAINWINDOW()
-    # print_dialog = QPrintDialog()
-    # set_title()
-    # myapp.ui.textBrowser_output.setText('Welcome in soco - Staad member force extract tool! Load data and fill input list to get report.')
-    # myapp.ui.plainTextEdit_serch.clear()
-    # myapp.setWindowIcon(QtGui.QIcon('app.ico'))
-    # # myapp.ui.comboBox_preset.addItems(preset_dict.keys())
+    print_dialog = QPrintDialog()
+    set_title()
+    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-MEPCon stress pipe reaction analysis app. Load data and fill input list to get report.')
+    myapp.ui.plainTextEdit_serch.clear()
+    myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     myapp.ui.comboBox_method.addItems(['keep separeted'])
     myapp.ui.comboBox_method.addItems(['summ in to one'])
     myapp.ui.comboBox_method.addItems(['one replacement'])
-    # # myapp.ui.comboBox_preset.setCurrentIndex(3)
+    ui_update()
+    myapp.ui.comboBox_method.setCurrentIndex(2)
     myapp.show()
 
-    loaddata()
-    s1 = support_dict[list(support_dict.keys())[0]]
-    s2 = support_dict[list(support_dict.keys())[4]]
-    s3 = support_dict[list(support_dict.keys())[12]]
-    s4 = support_dict[list(support_dict.keys())[13]]
-    s1+s2+s3+s4
+    #loaddata()
+    # s1 = support_dict[list(support_dict.keys())[0]]
+    # s2 = support_dict[list(support_dict.keys())[4]]
+    # s3 = support_dict[list(support_dict.keys())[12]]
+    # s4 = support_dict[list(support_dict.keys())[13]]
+    # s1+s2+s3+s4
     sys.exit(app.exec_())
 
 
