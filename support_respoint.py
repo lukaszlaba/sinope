@@ -3,53 +3,366 @@ This file is part of sinope.
 '''
 
 import numpy as np
+import pandas as pd
 from utils import find_max, find_min, find_maxabs
+
+
+sign_no_respect_combo_list = ['E(N/S)', 'E(E/W)', 'W(N/S)', 'W(E/W)']
 
 class support_respoint():
 
-    def __init__(self, id=None):
-        self.point = None
-        self.type = None
-        self.tag = None
-        #--
-        self.CordX = None
-        self.CordY = None
-        self.CordZ = None
-        #--
-        #reaction data
-        #self_reaction data
-        self.data_E_DOWN = np.array([0, 0, 0, 0, 0, 0])
-        self.data_E_E_W = np.array([0, 0, 0, 0, 0, 0])
-        self.data_E_N_S = np.array([0, 0, 0, 0, 0, 0])
-        self.data_E_UP = np.array([0, 0, 0, 0, 0, 0])
+    __MERGE_METHOD = 'max' # or min or abs
+    
+    def switch_merge_method_to_max():
+        support_respoint.__MERGE_METHOD = 'max'
+
+    def switch_merge_method_to_min():
+        support_respoint.__MERGE_METHOD = 'min'
+
+    def switch_merge_method_to_abs():
+        support_respoint.__MERGE_METHOD = 'abs'
+
+    def switch_merge_method_to_direct():
+        support_respoint.__MERGE_METHOD = 'direct'
         
-        self.data_Gravity = np.array([0, 0, 0, 0, 0, 0])
-        
-        self.data_Pressure1 = np.array([0, 0, 0, 0, 0, 0])
-        self.data_Pressure2 = np.array([0, 0, 0, 0, 0, 0])
-        self.data_Pressure3 = np.array([0, 0, 0, 0, 0, 0])
-        
-        self.data_SAM1 = np.array([0, 0, 0, 0, 0, 0])
-        self.data_SAM2 = np.array([0, 0, 0, 0, 0, 0])
-        
-        self.data_Therma1 = np.array([0, 0, 0, 0, 0, 0])
-        self.data_Therma2 = np.array([0, 0, 0, 0, 0, 0])
-        self.data_Therma3 = np.array([0, 0, 0, 0, 0, 0])
-        
-        self.data_W_E_W = np.array([0, 0, 0, 0, 0, 0])
-        self.data_W_N_S = np.array([0, 0, 0, 0, 0, 0])
-        #--
-        
+    #-------
+    
+    def __init__(self, data=pd.DataFrame({'A' : []})):
+        self.df = data
+
+    def __add__(self, other):
+        if self.df.empty:
+            return support_respoint(other.df.copy())
+        #----
+        this = self.df.copy()
+        this.reset_index(inplace=True, drop=True)
+        other = other.df.copy()
+        other.reset_index(inplace=True, drop=True)
+        out = self.df.copy()
+        out.reset_index(inplace=True, drop=True)
+        #----------------------------------------------------
+        if self.merge_method_is_max():
+            print('max')
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    print(out.at[index, 'Comb'])
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:
+                    out.at[index, 'FX'] = max(0, this.at[index, 'FX'], this.at[index, 'FX'] + other.at[index, 'FX'])
+                    out.at[index, 'FY'] = max(0, this.at[index, 'FY'], this.at[index, 'FY'] + other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = max(0, this.at[index, 'FZ'], this.at[index, 'FZ'] + other.at[index, 'FZ'])
+        #----------------------------------------------------
+        if self.merge_method_is_min():
+            print('min')
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    out.at[index, 'FX'] = - abs(this.at[index, 'FX']) - abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = - abs(this.at[index, 'FY']) - abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = - abs(this.at[index, 'FZ']) - abs(other.at[index, 'FZ'])
+                else:
+                    out.at[index, 'FX'] = min(0, this.at[index, 'FX'], this.at[index, 'FX'] + other.at[index, 'FX'])
+                    out.at[index, 'FY'] = min(0, this.at[index, 'FY'], this.at[index, 'FY'] + other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = min(0, this.at[index, 'FZ'], this.at[index, 'FZ'] + other.at[index, 'FZ'])
+        #----------------------------------------------------            
+        if self.merge_method_is_abs():
+            print('abs')
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:   
+                               
+                    if abs(this.at[index, 'FX']) > abs(this.at[index, 'FX'] + other.at[index, 'FX']):
+                        out.at[index, 'FX'] = this.at[index, 'FX']
+                    else:
+                        out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+
+                    if abs(this.at[index, 'FY']) > abs(this.at[index, 'FY'] + other.at[index, 'FY']):
+                        out.at[index, 'FY'] = this.at[index, 'FY']
+                    else:
+                        out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+
+                    if abs(this.at[index, 'FZ']) > abs(this.at[index, 'FZ'] + other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = this.at[index, 'FZ']
+                    else:
+                        out.at[index, 'FZ'] = this.at[index, 'FZ'] + other.at[index, 'FZ']                                            
+        #----------------------------------------------------
+        if self.merge_method_is_direct():
+            print('direct')
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' and ' + other.at[index, 'Point']
+                #----
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    out.at[index, 'FX'] = abs(this.at[index, 'FX']) + abs(other.at[index, 'FX'])
+                    out.at[index, 'FY'] = abs(this.at[index, 'FY']) + abs(other.at[index, 'FY'])
+                    out.at[index, 'FZ'] = abs(this.at[index, 'FZ']) + abs(other.at[index, 'FZ'])
+                else:
+                    out.at[index, 'FX'] = this.at[index, 'FX'] + other.at[index, 'FX']
+                    out.at[index, 'FY'] = this.at[index, 'FY'] + other.at[index, 'FY']
+                    out.at[index, 'FZ'] = this.at[index, 'FZ'] + other.at[index, 'FZ']
+        #!!!!!!!!!!!!!!!!!!!!!!!!MI missed
+        return support_respoint(out)
+
+    def __mul__(self, other):
+        if self.df.empty:
+            self.df = other.df.copy()
+        this = self.df.copy()
+        this.reset_index(inplace=True, drop=True)
+        other = other.df.copy()
+        other.reset_index(inplace=True, drop=True)
+        out = self.df.copy()
+        out.reset_index(inplace=True, drop=True)
+        if not "FX at" in out:
+            out['FX at'] = np.nan
+            out['FX at'] = np.nan
+            out['FY at'] = np.nan
+            out['FZ at'] = np.nan
+            out['MX at'] = np.nan
+            out['MY at'] = np.nan
+            out['MZ at'] = np.nan
+        #----------------------------------------------------
+        if self.merge_method_is_max():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                        out.at[index, 'FX'] = abs(this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = abs(other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                        out.at[index, 'FY'] = abs(this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = abs(other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = abs(this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = abs(other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+                else:
+                    if this.at[index, 'FX'] > other.at[index, 'FX']:
+                        out.at[index, 'FX'] = max(0, this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = max(0, other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if this.at[index, 'FY'] > other.at[index, 'FY']:
+                        out.at[index, 'FY'] = max(0, this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = max(0, other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if this.at[index, 'FZ'] > other.at[index, 'FZ']:
+                        out.at[index, 'FZ'] = max(0, this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = max(0, other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'                    
+        #----------------------------------------------------
+        if self.merge_method_is_min():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                
+                if out.at[index, 'Comb'] in  sign_no_respect_combo_list:
+                    if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                        out.at[index, 'FX'] = -abs(this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = -abs(other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                        out.at[index, 'FY'] = -abs(this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = -abs(other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                        out.at[index, 'FZ'] = -abs(this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = -abs(other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+                else:
+                    if this.at[index, 'FX'] < other.at[index, 'FX']:
+                        out.at[index, 'FX'] = min(0, this.at[index, 'FX'])
+                    else:
+                        out.at[index, 'FX'] = min(0, other.at[index, 'FX'])
+                        out.at[index, 'FX at'] = other.at[index, 'Point']
+                    if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                    #-----
+                    if this.at[index, 'FY'] < other.at[index, 'FY']:
+                        out.at[index, 'FY'] = min(0, this.at[index, 'FY'])
+                    else:
+                        out.at[index, 'FY'] = min(0, other.at[index, 'FY'])
+                        out.at[index, 'FY at'] = other.at[index, 'Point']
+                    if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                    #-----
+                    if this.at[index, 'FZ'] < other.at[index, 'FZ']:
+                        out.at[index, 'FZ'] = min(0, this.at[index, 'FZ'])
+                    else:
+                        out.at[index, 'FZ'] = min(0, other.at[index, 'FZ'])
+                        out.at[index, 'FZ at'] = other.at[index, 'Point']
+                    if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #----------------------------------------------------
+        if self.merge_method_is_abs():
+            for index, row in out.iterrows():
+                out.at[index, 'Point'] = this.at[index, 'Point'] + ' or ' + other.at[index, 'Point']
+                #-----
+                if abs(this.at[index, 'FX']) > abs(other.at[index, 'FX']):
+                    out.at[index, 'FX'] = this.at[index, 'FX']
+                else:
+                    out.at[index, 'FX'] = other.at[index, 'FX']
+                    out.at[index, 'FX at'] = other.at[index, 'Point']
+                if out.at[index, 'FX'] == 0: out.at[index, 'FX at'] = '-'
+                #-----
+                if abs(this.at[index, 'FY']) > abs(other.at[index, 'FY']):
+                    out.at[index, 'FY'] = this.at[index, 'FY']
+                else:
+                    out.at[index, 'FY'] = other.at[index, 'FY']
+                    out.at[index, 'FY at'] = other.at[index, 'Point']
+                if out.at[index, 'FY'] == 0: out.at[index, 'FY at'] = '-'
+                #-----
+                if abs(this.at[index, 'FZ']) > abs(other.at[index, 'FZ']):
+                    out.at[index, 'FZ'] = this.at[index, 'FZ']
+                else:
+                    out.at[index, 'FZ'] = other.at[index, 'FZ']
+                    out.at[index, 'FZ at'] = other.at[index, 'Point']
+                if out.at[index, 'FZ'] == 0: out.at[index, 'FZ at'] = '-'
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!MI missed
+        return support_respoint(out)
+
     @property
-    def force_Gravity(self):
-        return self.data_Gravity
+    def Point(self):
+        return self.df['Point'].iloc[0]
     
-    
-    
-    
-        # out gravity, EQ E_W, EQ E_W, Pressure, SAM, Thermal,  W E_W, W E_W
+    @property
+    def Type(self):
+        return self.df['Type'].iloc[0]
+
+    @property
+    def Tag(self):
+        return self.df['Tag'].iloc[0]
+
+    @property
+    def CoordinateXYZ(self):
+        return [self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0]]
+
+    @property
+    def Bese_reactions(self):
+        to_get_list = ['Comb']
+        #----
+        if str(self.df['FX'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FX')
+
+        if str(self.df['FY'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FY')
+
+        if str(self.df['FZ'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('FZ')
         
-        # s1 + s2, s1 * s2
+        if str(self.df['MX'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MX')
+        
+        if str(self.df['MY'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MY')
+        
+        if str(self.df['MZ'].iloc[0]) != str(float("nan")) : 
+            to_get_list.append('MZ')
+            
+        #-------
+        if 'FX' in to_get_list:
+            if 'FX at' in self.df: to_get_list.append('FX at')
+
+        if 'FY' in to_get_list:
+            if 'FY at' in self.df: to_get_list.append('FY at')
+
+        if 'FZ' in to_get_list:
+            if 'FZ at' in self.df: to_get_list.append('FZ at')
+        
+        if 'MX' in to_get_list:
+            if 'MX at' in self.df: to_get_list.append('MX at')
+        
+        if 'MY' in to_get_list:
+            if 'MY at' in self.df: to_get_list.append('MY at')
+        
+        if 'MZ' in to_get_list:
+            if 'MZ at' in self.df: to_get_list.append('MZ at')
+        #----
+        return self.df.loc[:,to_get_list]
+    
+    def get_force_value(self, Comb_name='E(UP)', Force_name='FX'):
+        value = float(self.df.loc[self.df['Comb'] == Comb_name][Force_name])
+        
+        if str(value) != str(float("nan")):
+            return value
+        else:
+            return None
+
+    def get_force_vector(self, Comb_name='E(UP)'):
+        FX = self.get_force_value(Comb_name, 'FX')
+        FY = self.get_force_value(Comb_name, 'FY')
+        FZ = self.get_force_value(Comb_name, 'FZ')
+        if FX or FY or FZ:
+            return [FX, FY, FZ]
+        else:
+            return None
+
+    def get_moment_vector(self, Comb_name='E(UP)'):
+        MX = self.get_force_value(Comb_name, 'MX')
+        MY = self.get_force_value(Comb_name, 'MY')
+        MZ = self.get_force_value(Comb_name, 'MZ')
+        if MX or MY or MZ:
+            return [MX, MY, MZ]
+        else:
+            return None
+
+        
+    def merge_method_is_max(self):
+        if support_respoint.__MERGE_METHOD == 'max':
+            return True
+        else:
+            return False
+
+    def merge_method_is_min(self):
+        if support_respoint.__MERGE_METHOD == 'min':
+            return True
+        else:
+            return False
+
+    def merge_method_is_abs(self):
+        if support_respoint.__MERGE_METHOD == 'abs':
+            return True
+        else:
+            return False
+
+    def merge_method_is_direct(self):
+        if support_respoint.__MERGE_METHOD == 'direct':
+            return True
+        else:
+            return False
+
+    def __str__(self):
+        return self.Point + ',' + self.Type
 '''
 LOAD R1 LOADTYPE Gravity  TITLE SELF-WEIGHT Y-
 LOAD R2 LOADTYPE Dead  TITLE ADDITIONAL FRAMING WEIGHT
@@ -73,240 +386,6 @@ LOAD R33 LOADTYPE Wind  TITLE WIND_PSAS_Y-
 LOAD R34 LOADTYPE Wind  TITLE WIND_STR_X+
 LOAD R35 LOADTYPE Wind  TITLE WIND_STR_Z+
 LOAD R36 LOADTYPE Wind  TITLE WIND_STR_Y-
-'''
-
-
-
-
-
-'''    
-    def calc_additional_forces(self):
-        self.calc_Mtot()
-        self.calc_Vtot()
-        self.calc_bolt_maxtension()
-        self.calc_bolt_maxcompression()
-        self.calc_bolt_maxshear()
-        self.calc_Fynorm()
-        self.calc_Fznorm()
-        
-    #---
-    def calc_Mtot(self):
-        for record in self.res:
-            My = record[self.colMy]
-            Mz = record[self.colMz]
-            record.append(round((My**2 + Mz**2)**0.5, 3))
-
-    def calc_Vtot(self):
-        for record in self.res:
-            Fy = record[self.colFy]
-            Fz = record[self.colFz]
-            record.append(round((Fy**2 + Fz**2)**0.5, 3))
-
-    def calc_bolt_maxtension(self):
-        for record in self.res:
-            My = abs(record[self.colMy])
-            Mz = abs(record[self.colMz])
-            Fx = record[self.colFx]
-            #--
-            if 'ft' in self.unit_moment: a = 1
-            if 'in' in self.unit_moment: a = 12
-            if 'm' in self.unit_moment: a = 0.305
-            if 'mm' in self.unit_moment: a = 305
-            #--   
-            fp = Fx / 4
-            fm = -My / a / 2 - Mz / a / 2
-            f = fp + fm
-            f = min(f,0)
-            record.append(round(f, 3))
-
-    def calc_bolt_maxcompression(self):
-        for record in self.res:
-            My = abs(record[self.colMy])
-            Mz = abs(record[self.colMz])
-            Fx = record[self.colFx]
-            #--
-            if 'ft' in self.unit_moment: a = 1
-            if 'in' in self.unit_moment: a = 12
-            if 'm' in self.unit_moment: a = 0.305
-            if 'mm' in self.unit_moment: a = 305
-            #--
-            fp = Fx / 4
-            fm = My / a / 2 + Mz / a / 2
-            f = fp + fm
-            f = max(f,0)
-            record.append(round(f, 3))
-
-    def calc_bolt_maxshear(self):
-        for record in self.res:
-            Fy = abs(record[self.colFy])
-            Fz = abs(record[self.colFz])
-            Mx = abs(record[self.colMx])
-            fvy = Fy / 4
-            fvz = Fz / 4
-            #--
-            if 'ft' in self.unit_moment: a = 1
-            if 'in' in self.unit_moment: a = 12
-            if 'm' in self.unit_moment: a = 0.305
-            if 'mm' in self.unit_moment: a = 305
-            #--
-            fm = Mx / 2 / (a**2 + a**2)**0.5
-            fmy = fm/2**0.5
-            fmz = fm/2**0.5
-            #--
-            fy = fvy + fmy
-            fz = fvz + fmz
-            f =(fy**2 + fz**2)**0.5
-            record.append(round(f, 3))
-
-    def calc_Fynorm(self):
-        for record in self.res:
-            Fy = record[self.colFy]
-            if 'i' in self.number:
-                Fynom = Fy
-            if 'j' in self.number:
-                Fynom = -Fy
-            record.append(Fynom)
-            
-    def calc_Fznorm(self):
-        for record in self.res:
-            Fz = record[self.colFz]
-            if 'i' in self.number:
-                Fznom = Fz
-            if 'j' in self.number:
-                Fznom = -Fz
-            record.append(Fznom)
-    #---
-    @property
-    def Fxmaxabs(self):
-        return find_maxabs(self.res, self.colFx)
-    @property
-    def Fxmax(self):
-        return find_max(self.res, self.colFx)
-    @property
-    def Fxmin(self):
-        return find_min(self.res, self.colFx)
-
-
-    @property
-    def Fymaxabs(self):
-        return find_maxabs(self.res, self.colFy)
-        
-    @property
-    def Fzmaxabs(self):
-        return find_maxabs(self.res, self.colFz)
-
-    @property
-    def Mxmaxabs(self):
-        return find_maxabs(self.res, self.colMx)
-
-    @property
-    def Mymaxabs(self):
-        return find_maxabs(self.res, self.colMy)
-    @property
-    def Mymax(self):
-        return find_max(self.res, self.colMy)
-    @property
-    def Mymin(self):
-        return find_min(self.res, self.colMy)
-
-    @property
-    def Mzmaxabs(self):
-        return find_maxabs(self.res, self.colMz)
-    @property
-    def Mzmax(self):
-        return find_max(self.res, self.colMz)
-    @property
-    def Mzmin(self):
-        return find_min(self.res, self.colMz)
-
-    @property
-    def Mzmaxabs(self):
-        return find_maxabs(self.res, self.colMz)
-        
-    @property
-    def Mtotmax(self):
-        return find_maxabs(self.res, self.colMtot)
-
-    @property
-    def Vtotmax(self):
-        return find_maxabs(self.res, self.colVtot)
-
-    @property
-    def Bolttensionmax(self):
-        return find_maxabs(self.res, self.colboltmaxtension)
-        
-    @property
-    def Boltcompressionmax(self):
-        return find_maxabs(self.res, self.colmaxboltcompression)
-
-    @property
-    def Boltshearmax(self):
-        return find_maxabs(self.res, self.colmaxboltshear)     
-        
-    @property
-    def Fynormmax(self):
-        return find_max(self.res, self.colFynorm)
-    @property
-    def Fynormmin(self):
-        return find_min(self.res, self.colFynorm)
-
-    @property
-    def Fznormmax(self):
-        return find_max(self.res, self.colFznorm)
-    @property
-    def Fznormmin(self):
-        return find_min(self.res, self.colFznorm)
-
-    #---
-    @property
-    def Fxlist(self):
-        return [i[self.colFx] for i in self.res]
-    @property
-    def Fylist(self):
-        return [i[self.colFy] for i in self.res]
-    @property
-    def Fzlist(self):
-        return [i[self.colFz] for i in self.res]
-    @property
-    def Mxlist(self):
-        return [i[self.colMx] for i in self.res]
-    @property
-    def Mylist(self):
-        return [i[self.colMy] for i in self.res]
-    @property
-    def Mzlist(self):
-        return [i[self.colMz] for i in self.res]
-        
-    @property
-    def Mtotlist(self):
-        return [i[self.colMtot] for i in self.res]
-    @property
-    def Vtotlist(self):
-        return [i[self.colVtot] for i in self.res]
-        
-    @property
-    def MaxBoltmaxtensionlist(self):
-        return [i[self.colboltmaxtension] for i in self.res]
-    @property
-    def Maxboltcompressionlist(self):
-        return [i[self.colmaxboltcompression] for i in self.res] 
-    @property
-    def Maxboltshearlist(self):
-        return [i[self.colmaxboltshear] for i in self.res]  
-    
-    @property
-    def Fynormlist(self):
-        return [i[self.colFynorm] for i in self.res]
-    @property
-    def Fznormlist(self):
-        return [i[self.colFznorm] for i in self.res]
-
-    @property
-    def LClist(self):
-        return [i[self.colLC] for i in self.res]
-    @property
-    def numberlist(self):
-        return [self.number]*len(self.res)
 '''
 
 #test if main

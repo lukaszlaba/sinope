@@ -1,9 +1,6 @@
 Sinope - J-MEPCon stress pipe reaction analysis app
 ---------------------------------------------------
 
-THIS APP IS IN PROGRESS
------------------------
-
 `Download binaries for Windows <https://github.com/lukaszlaba/sinope/releases>`_
 
 .. image:: interface.png
@@ -11,9 +8,8 @@ THIS APP IS IN PROGRESS
 Changelog
 ---------
 
-Sinope 0.0.1 (beta stage for testing)
-  - Xxxxxxxxx
-
+Sinope 0.0.1 (poc stage for testing)
+  - proof of concept stage
 
 Description
 -----------

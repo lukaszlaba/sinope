@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------
 Copyright (C) 2022 Lukasz Laba <lukaszlaba@gmail.com>
 
-This file is part of soco.
+This file is part of sinope.
 
 Soco is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 
 from mainwindow_ui import Ui_MainWindow
-from support_respoint1 import support_respoint
+from support_respoint import support_respoint
 from preset_content import preset_dict
 
 import pandas
@@ -357,32 +357,51 @@ def show_report():
         report += '\n'    # report += 'Extreme cases list:\n'
     myapp.ui.textBrowser_output.setText(report)
 
-#-----------------------------------------------------------
-
 def plot3D():
-    #You need to use Axes3D from mplot3d in mpl_toolkits, then set the subplot projection to 3d:
-
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    import numpy as np
-    #-----
-    if myapp.ui.comboBox_plt_mf.currentText() == 'force':
-        to_plot = ['FX', 'FY', 'FZ']
-    if myapp.ui.comboBox_plt_mf.currentText() == 'moment':
-        to_plot = ['MX', 'MY', 'MZ']
     comb = myapp.ui.comboBox_plt_comb.currentText()
+    force_type = myapp.ui.comboBox_plt_mf.currentText()
     #-----
-
-    #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<HERE
-    soa = np.array([[0, 0, 0, 1, -2, 2], [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 2, 1, -4], [0, 0, 0, 0.5, 0.7, 0]])
-    X, Y, Z, U, V, W = zip(*soa)
+    X0=[]
+    X1=[]
+    Y0=[]
+    Y1=[]
+    Z0=[]
+    Z1=[]
+    label = []
+    max_value = 0
+    for s_name in get_pointlist():
+        s = support_dict[s_name]
+        if force_type == 'force': vector = s.get_force_vector(comb)
+        if force_type == 'moment': vector = s.get_force_vector(comb)
+        if vector:
+            print(vector)
+            X0.append(0)
+            X1.append(vector[0])
+            Y0.append(0)
+            Y1.append(vector[1])
+            Z0.append(0)
+            Z1.append(vector[2])
+            label.append(s_name)
+            max_value = max(max_value, abs(max(vector)), abs(min(vector)))
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.quiver(X, Y, Z, U, V, W)
-    ax.set_xlim([-5, 5])
-    ax.set_ylim([-5, 5])
-    ax.set_zlim([-5, 5])
+    ax.quiver(X0, Y0, Z0, X1, Y1, Z1)
+    max_value = 1.1*max_value
+    ax.set_xlim([-max_value, max_value])
+    ax.set_ylim([-max_value, max_value])
+    ax.set_zlim([-max_value, max_value])
+    if force_type == 'force':
+        ax.set_xlabel("Fx " + unit_force)
+        ax.set_ylabel("Fy " + unit_force)
+        ax.set_zlabel("Fz " + unit_force)
+    if force_type == 'moment':
+        ax.set_xlabel("Mx " + unit_moment)
+        ax.set_ylabel("My " + unit_moment)
+        ax.set_zlabel("Mz " + unit_moment)
+    ax.set_title(comb + '-' + force_type)
+    if myapp.ui.checkBox_pltAnnot.isChecked():
+        for i in range(len(X1)):
+            ax.text(X1[i], Y1[i], Z1[i], label[i])
     plt.show()
 
 def print_report():
@@ -409,8 +428,8 @@ Soco is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 You should have received a copy of the GNU General Public License along with Soco; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 Copyright (C) 2023 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
-Project website: https://github.com/lukaszlaba/soco
-Check for lataest version: https://github.com/lukaszlaba/soco/releases
+Project website: https://github.com/lukaszlaba/sinope
+Check for lataest version: https://github.com/lukaszlaba/sinope/releases
 '''
     myapp.ui.textBrowser_output.setText(about)
 
@@ -431,17 +450,17 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.setCurrentIndex(2)
     myapp.show()
 
-    #loaddata()
-    # s1 = support_dict[list(support_dict.keys())[0]]
-    # s2 = support_dict[list(support_dict.keys())[4]]
-    # s3 = support_dict[list(support_dict.keys())[12]]
-    # s4 = support_dict[list(support_dict.keys())[13]]
-    # s1+s2+s3+s4
+    loaddata()
+    s1 = support_dict[list(support_dict.keys())[0]]
+    s2 = support_dict[list(support_dict.keys())[4]]
+    s3 = support_dict[list(support_dict.keys())[12]]
+    s4 = support_dict[list(support_dict.keys())[13]]
+    s1+s2+s3+s4
     sys.exit(app.exec_())
 
 
 #command used to frozening with pyinstaller
-#pyinstaller --onefile --noconsole --icon=app.ico ..\soco.py
+#pyinstaller --onefile --noconsole --icon=app.ico ..\sinope.py
 
 #cd C:\Users\Lenovo\python_wip\myenv\env_sinope\Scripts
 #pyuic5 C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow.ui > C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow_ui.py
