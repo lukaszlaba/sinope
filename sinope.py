@@ -35,7 +35,6 @@ import matplotlib.pyplot as plt
 
 from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
-from preset_content import preset_dict
 
 import pandas
 
@@ -102,8 +101,8 @@ def loaddata():
     #---asking for filename
     global opendir
     global filename
-    #filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
-    filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
+    #filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
     #filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
     filepath = str(filepath)
     if not filepath == '':
@@ -450,17 +449,17 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.setCurrentIndex(2)
     myapp.show()
 
-    loaddata()
-    s1 = support_dict[list(support_dict.keys())[0]]
-    s2 = support_dict[list(support_dict.keys())[4]]
-    s3 = support_dict[list(support_dict.keys())[12]]
-    s4 = support_dict[list(support_dict.keys())[13]]
-    s1+s2+s3+s4
+    # loaddata()
+    # s1 = support_dict[list(support_dict.keys())[0]]
+    # s2 = support_dict[list(support_dict.keys())[4]]
+    # s3 = support_dict[list(support_dict.keys())[12]]
+    # s4 = support_dict[list(support_dict.keys())[13]]
+    # s1+s2+s3+s4
     sys.exit(app.exec_())
 
 
 #command used to frozening with pyinstaller
-#pyinstaller --onefile --noconsole --icon=app.ico ..\sinope.py
+#pyinstaller --onefile --noconsole --icon=app.ico C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\sinope.py
 
 #cd C:\Users\Lenovo\python_wip\myenv\env_sinope\Scripts
 #pyuic5 C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow.ui > C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow_ui.py

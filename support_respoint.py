@@ -4,7 +4,6 @@ This file is part of sinope.
 
 import numpy as np
 import pandas as pd
-from utils import find_max, find_min, find_maxabs
 
 
 sign_no_respect_combo_list = ['E(N/S)', 'E(E/W)', 'W(N/S)', 'W(E/W)']
