@@ -14,7 +14,7 @@ Sinope 0.0.1 (poc stage for testing)
 Description
 -----------
 
-Sinope is a J-MEPCon dedicated tool that help analyse mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalen pipe reactions.
+Sinope is a J-ConMP dedicated tool that help analyse mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalen pipe reactions.
 
 How to run it
 -------------

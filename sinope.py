@@ -416,7 +416,7 @@ def set_title(info=''):
 
 def info():
     about = '''
-Sinope - J-MEPCon stress pipe reaction analysis app
+Sinope - J-ConMP stress pipe reaction analysis app
 Alpha stage software for testing only
 
 -------------Licence-------------
@@ -439,7 +439,7 @@ if __name__ == '__main__':
     myapp = MAINWINDOW()
     print_dialog = QPrintDialog()
     set_title()
-    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-MEPCon stress pipe reaction analysis app. Load data and fill input list to get report.')
+    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-ConMP stress pipe reaction analysis app. Load data and fill input list to get report.')
     myapp.ui.plainTextEdit_serch.clear()
     myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     myapp.ui.comboBox_method.addItems(['keep separeted'])
