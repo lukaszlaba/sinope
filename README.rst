@@ -1,4 +1,4 @@
-Sinope - J-MEPCon stress pipe reaction analysis app
+Sinope - J-ConMP stress pipe reaction analysis app
 ---------------------------------------------------
 
 `Download binaries for Windows <https://github.com/lukaszlaba/sinope/releases>`_
