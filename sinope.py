@@ -32,6 +32,7 @@ from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtWidgets import QMessageBox
 #from tabulate import tabulate
 import matplotlib.pyplot as plt
+from dxfwrite import DXFEngine as dxf
 
 from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
@@ -102,8 +103,8 @@ def loaddata():
     global opendir
     global filename
     filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
-    #filepath = 'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
-    #filepath = '/home/lul/Downloads/FAB-SSS-10_LoadReportForStructural.xlsx'
+    #filepath = 'C:/testdata.xlsx'
+    #filepath = '/home/lul/Downloads/test.xlsx'
     filepath = str(filepath)
     if not filepath == '':
         opendir = os.path.dirname(filepath)
@@ -403,6 +404,29 @@ def plot3D():
             ax.text(X1[i], Y1[i], Z1[i], label[i])
     plt.show()
 
+def save_as_dxf():
+    filenamepath = os.path.join(opendir, 'report.dxf')
+    drawing = dxf.drawing(filenamepath)
+    drawing.add_layer('Con', color=2)
+
+    # text = dxf.text('Text', (2, 2, 0), height=5.0, rotation=0)
+    # text['layer'] = 'Xxxx'
+    # text['color'] = 5
+    # drawing.add(text)
+
+    # line = dxf.line((0, 0, 0), (10, 10, 10))
+    # line['layer'] = 'Xxxx'
+    # line['color'] = 3
+    # drawing.add(line)
+
+    for key in support_dict.keys():
+        s = support_dict[key]
+        text = dxf.mtext(s.Point + s.Bese_reactions.to_string(), s.CoordinateXYZ, height=0.01, rotation=0)
+        text['layer'] = 'Con'
+        drawing.add(text)
+
+    drawing.save()
+
 def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
         myapp.ui.textBrowser_output.document().print_(print_dialog.printer())
@@ -449,12 +473,12 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.setCurrentIndex(2)
     myapp.show()
 
-    # loaddata()
-    # s1 = support_dict[list(support_dict.keys())[0]]
-    # s2 = support_dict[list(support_dict.keys())[4]]
-    # s3 = support_dict[list(support_dict.keys())[12]]
-    # s4 = support_dict[list(support_dict.keys())[13]]
-    # s1+s2+s3+s4
+    loaddata()
+    s1 = support_dict[list(support_dict.keys())[0]]
+    s2 = support_dict[list(support_dict.keys())[4]]
+    s3 = support_dict[list(support_dict.keys())[12]]
+    s4 = support_dict[list(support_dict.keys())[13]]
+    s1+s2+s3+s4
     sys.exit(app.exec_())
 
 

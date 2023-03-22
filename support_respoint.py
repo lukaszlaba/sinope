@@ -40,6 +40,8 @@ class support_respoint():
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
         #----------------------------------------------------
+        #format to make posible adding this and other in case one have no M
+        #----------------------------------------------------
         if self.merge_method_is_max():
             print('max')
             for index, row in out.iterrows():
@@ -120,14 +122,16 @@ class support_respoint():
         other.reset_index(inplace=True, drop=True)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
-        if not "FX at" in out:
-            out['FX at'] = np.nan
-            out['FX at'] = np.nan
-            out['FY at'] = np.nan
-            out['FZ at'] = np.nan
-            out['MX at'] = np.nan
-            out['MY at'] = np.nan
-            out['MZ at'] = np.nan
+        # if not "FX at" in out:
+        #     out['FX at'] = np.nan
+        #     out['FX at'] = np.nan
+        #     out['FY at'] = np.nan
+        #     out['FZ at'] = np.nan
+        #     out['MX at'] = np.nan
+        #     out['MY at'] = np.nan
+        #     out['MZ at'] = np.nan
+        #----------------------------------------------------
+        #format to make posible adding this and other in case one have no M
         #----------------------------------------------------
         if self.merge_method_is_max():
             for index, row in out.iterrows():
@@ -264,7 +268,7 @@ class support_respoint():
 
     @property
     def CoordinateXYZ(self):
-        return [self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0]]
+        return (self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0])
 
     @property
     def Bese_reactions(self):
