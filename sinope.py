@@ -1,21 +1,21 @@
 '''
 --------------------------------------------------------------------------
-Copyright (C) 2022 Lukasz Laba <lukaszlaba@gmail.com>
+Copyright (C) 2023 Lukasz Laba <lukaszlaba@gmail.com>
 
-This file is part of sinope.
+This file is part of Sinope.
 
-Soco is free software; you can redistribute it and/or modify
+Sinope is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-Soco is distributed in the hope that it will be useful,
+Sinope is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Soco; if not, write to the Free Software
+along with Sinope; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 --------------------------------------------------------------------------
 
@@ -23,14 +23,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
 import sys
-#import win32com.client
 
 import openpyxl #pandas need this!!
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtWidgets import QMessageBox
-#from tabulate import tabulate
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
@@ -45,8 +43,14 @@ unit_force = '[]'
 unit_moment = '[]'
 unit_coord = '[]'
 
+opendir = os.path.dirname(__file__)#dir path for save and open
+filename = None
 
-version = 'sinope 0.0.1'
+support_dict = {}
+excel_data_df = None
+
+
+version = 'sinope 0.0.2'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -57,6 +61,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_Report.clicked.connect(show_report)
         # #--
         self.ui.pushButton_plt_show.clicked.connect(plot3D)
+        self.ui.pushButton_dxf.clicked.connect(save_as_dxf)
         #
         # #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
@@ -70,13 +75,6 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_print.clicked.connect(print_report)
         #--
         self.ui.comboBox_method.currentIndexChanged.connect(ui_update)
-
-
-opendir = os.path.dirname(__file__)#dir path for save and open
-filename = None
-
-support_dict = {}
-excel_data_df = None
 
 def ui_update():
     if myapp.ui.comboBox_method.currentIndex() == 0:
@@ -126,14 +124,17 @@ def loaddata():
                                                     'CoordZ': 'Z',
                                                     'Combination': 'Comb'
                                                     })
+    excel_data_df['Type'] = excel_data_df['Type'].fillna('undefined')
     for point in list_of_points:
         df1 = excel_data_df[excel_data_df['Point'] == point]
         support_dict[point] = support_respoint(df1)
     #---pushing supports types to combobox
     point_types = excel_data_df['Type'].drop_duplicates().tolist()
+    myapp.ui.comboBox_Type.clear()
     myapp.ui.comboBox_Type.addItems(point_types)
     #---pushing combination mames to combobox
     point_types = excel_data_df['Comb'].drop_duplicates().tolist()
+    myapp.ui.comboBox_plt_comb.clear()
     myapp.ui.comboBox_plt_comb.addItems(point_types)
     #---adding filename to app window title
     set_title(filename)
@@ -339,8 +340,9 @@ def show_report():
     report += 'Data source - ' + sourcefile + '\n'
     report += 'Results for  - ' + str(mlist)
     report += '\n\n'
-    report += 'FX FY FZ MX MY MZ are PASS format reaction forces\n'
-    report += 'Force unit - %s, Moment unit - %s'%(unit_force, unit_moment)
+    #report += 'FX FY FZ MX MY MZ are PASS format reaction forces\n'
+    report += 'FX FY FZ are PASS format reaction forces\n'
+    report += 'Force unit - %s '%(unit_force)
     report += '\n\n'
     #------------------
     if myapp.ui.checkBox_full.isChecked() or myapp.ui.comboBox_method.currentText() == 'keep separeted':
@@ -405,27 +407,37 @@ def plot3D():
     plt.show()
 
 def save_as_dxf():
-    filenamepath = os.path.join(opendir, 'report.dxf')
-    drawing = dxf.drawing(filenamepath)
-    drawing.add_layer('Con', color=2)
+    if not filename:
+        myapp.ui.textBrowser_output.setText('Load excel data first!')
+        return 0
+    try:
+        dxf_filename = filename.split('.')[0]
+        dxf_filename = dxf_filename + '.dxf'
+        filenamepath = os.path.join(opendir, dxf_filename)
+        drawing = dxf.drawing(filenamepath)
+        layer_name = 'sinope'
+        drawing.add_layer(layer_name, color=2)
 
-    # text = dxf.text('Text', (2, 2, 0), height=5.0, rotation=0)
-    # text['layer'] = 'Xxxx'
-    # text['color'] = 5
-    # drawing.add(text)
+        # text = dxf.text('Text', (2, 2, 0), height=5.0, rotation=0)
+        # text['layer'] = 'Xxxx'
+        # text['color'] = 5
+        # drawing.add(text)
 
-    # line = dxf.line((0, 0, 0), (10, 10, 10))
-    # line['layer'] = 'Xxxx'
-    # line['color'] = 3
-    # drawing.add(line)
+        # line = dxf.line((0, 0, 0), (10, 10, 10))
+        # line['layer'] = 'Xxxx'
+        # line['color'] = 3
+        # drawing.add(line)
 
-    for key in support_dict.keys():
-        s = support_dict[key]
-        text = dxf.mtext(s.Point + s.Bese_reactions.to_string(), s.CoordinateXYZ, height=0.01, rotation=0)
-        text['layer'] = 'Con'
-        drawing.add(text)
+        for key in support_dict.keys():
+            s = support_dict[key]
+            text = dxf.mtext(s.Point + s.Bese_reactions.to_string(), s.CoordinateXYZ, height=0.01, rotation=0)
+            text['layer'] = layer_name
+            drawing.add(text)
+        drawing.save()
+        myapp.ui.textBrowser_output.setText('Dxf saved at ' + filenamepath)
+    except:
+        myapp.ui.textBrowser_output.setText('Dxf not saved!! Some problems occurred.')
 
-    drawing.save()
 
 def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
@@ -437,18 +449,17 @@ def set_title(info=''):
     else:
         myapp.setWindowTitle(version)
 
-
 def info():
     about = '''
 Sinope - J-ConMP stress pipe reaction analysis app
-Alpha stage software for testing only
+Alpha stage software.
 
 -------------Licence-------------
-Soco is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+Sinope is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-Soco is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+Sinope is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with Soco; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
+You should have received a copy of the GNU General Public License along with Sinope; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
 Copyright (C) 2023 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
 Project website: https://github.com/lukaszlaba/sinope
@@ -457,8 +468,6 @@ Check for lataest version: https://github.com/lukaszlaba/sinope/releases
     myapp.ui.textBrowser_output.setText(about)
 
 if __name__ == '__main__':
-
-
     app = QtWidgets.QApplication(sys.argv)
     myapp = MAINWINDOW()
     print_dialog = QPrintDialog()
@@ -471,14 +480,14 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.addItems(['one replacement'])
     ui_update()
     myapp.ui.comboBox_method.setCurrentIndex(2)
+    myapp.ui.comboBox_plt_mf.setEnabled(False)
     myapp.show()
-
-    loaddata()
-    s1 = support_dict[list(support_dict.keys())[0]]
-    s2 = support_dict[list(support_dict.keys())[4]]
-    s3 = support_dict[list(support_dict.keys())[12]]
-    s4 = support_dict[list(support_dict.keys())[13]]
-    s1+s2+s3+s4
+    #loaddata()
+    # s1 = support_dict[list(support_dict.keys())[0]]
+    # s2 = support_dict[list(support_dict.keys())[4]]
+    # s3 = support_dict[list(support_dict.keys())[12]]
+    # s4 = support_dict[list(support_dict.keys())[13]]
+    # s1+s2+s3+s4
     sys.exit(app.exec_())
 
 

@@ -11,6 +11,10 @@ Changelog
 Sinope 0.0.1 (poc stage for testing)
   - proof of concept stage
 
+Sinope 0.0.2 (poc stage for testing)
+  - dxf export feature added
+  - alpha stage
+
 Description
 -----------
 
@@ -24,7 +28,7 @@ Link to windows binaries download is shown below.
 
 https://github.com/lukaszlaba/sinope/releases
 
-You can also run it by using Python engine. After the Python and needed libraries was installed, just run sinope.py file. Soco is  based on Python 3 and non-standard Python libraries PyQt5, matplotlib, pandas.
+You can also run it by using Python engine. After the Python and needed libraries was installed, just run sinope.py file. Soco is  based on Python 3 and non-standard Python libraries pyqt5, matplotlib, pandas, dxfwrite.
 
 License
 -------

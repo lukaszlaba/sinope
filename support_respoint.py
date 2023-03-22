@@ -1,5 +1,5 @@
 '''
-This file is part of sinope.
+This file is part of Sinope.
 '''
 
 import numpy as np
@@ -122,14 +122,6 @@ class support_respoint():
         other.reset_index(inplace=True, drop=True)
         out = self.df.copy()
         out.reset_index(inplace=True, drop=True)
-        # if not "FX at" in out:
-        #     out['FX at'] = np.nan
-        #     out['FX at'] = np.nan
-        #     out['FY at'] = np.nan
-        #     out['FZ at'] = np.nan
-        #     out['MX at'] = np.nan
-        #     out['MY at'] = np.nan
-        #     out['MZ at'] = np.nan
         #----------------------------------------------------
         #format to make posible adding this and other in case one have no M
         #----------------------------------------------------
@@ -366,43 +358,7 @@ class support_respoint():
 
     def __str__(self):
         return self.Point + ',' + self.Type
-'''
-LOAD R1 LOADTYPE Gravity  TITLE SELF-WEIGHT Y-
-LOAD R2 LOADTYPE Dead  TITLE ADDITIONAL FRAMING WEIGHT
-LOAD R3 LOADTYPE Dead  TITLE DL_SERVICES
-LOAD R11 LOADTYPE None  TITLE PSAS P&T X+
-*X-dir = East-West direction for this rack
-LOAD R12 LOADTYPE None  TITLE PSAS P&T Z+
-*Z-dir = North-South direction for this rack
-LOAD R13 LOADTYPE None  TITLE PSAS P&T Y-
-LOAD R21 LOADTYPE Seismic-H  TITLE EQ SEISMIC_MASS_X
-LOAD R22 LOADTYPE Seismic-H  TITLE EQ SEISMIC_MASS_Z
-LOAD R23 LOADTYPE Seismic-H  TITLE EQ PSAS X+
-LOAD R24 LOADTYPE Seismic-H  TITLE EQ PSAS Z+
-LOAD R25 LOADTYPE Seismic-V  TITLE EQ PSAS Y-
-LOAD R26 LOADTYPE Seismic-H  TITLE EQ PSAS S.A.M.X+
-LOAD R27 LOADTYPE Seismic-H  TITLE EQ PSAS S.A.M.Z+
-LOAD R28 LOADTYPE Seismic-V  TITLE EQ PSAS S.A.M.Y-
-LOAD R31 LOADTYPE Wind  TITLE WIND_PSAS_X+
-LOAD R32 LOADTYPE Wind  TITLE WIND_PSAS_Z+
-LOAD R33 LOADTYPE Wind  TITLE WIND_PSAS_Y-
-LOAD R34 LOADTYPE Wind  TITLE WIND_STR_X+
-LOAD R35 LOADTYPE Wind  TITLE WIND_STR_Z+
-LOAD R36 LOADTYPE Wind  TITLE WIND_STR_Y-
-'''
 
 #test if main
 if __name__ == '__main__': 
     m = support_respoint()
-
-
-    
-
- 
- 
- 
- 
- 
- 
- 
-    
