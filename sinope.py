@@ -112,6 +112,13 @@ def loaddata():
     global excel_data_df
     global support_dict
     excel_data_df = pandas.read_excel(filepath, sheet_name='SUPPORTS')
+    #---adding line prefix
+    file_name = os.path.basename(filepath)
+    file_name = file_name.split('.')[0]
+    line_name = file_name.split('_')[0]
+    print(line_name)
+    excel_data_df['Point'] = line_name + '_' +excel_data_df['Point']
+    #----
     list_of_points = excel_data_df['Point'].drop_duplicates().tolist()
     excel_data_df = excel_data_df.rename(columns={  'SumOfBuildingFX': 'FX',
                                                     'SumOfBuildingFY': 'FY',
@@ -125,6 +132,7 @@ def loaddata():
                                                     'Combination': 'Comb'
                                                     })
     excel_data_df['Type'] = excel_data_df['Type'].fillna('undefined')
+    #----
     for point in list_of_points:
         df1 = excel_data_df[excel_data_df['Point'] == point]
         support_dict[point] = support_respoint(df1)
