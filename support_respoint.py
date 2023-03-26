@@ -259,6 +259,17 @@ class support_respoint():
         return self.df['Tag'].iloc[0]
 
     @property
+    def Line(self):
+        if len(self.df['Point'].iloc[0].split('_')) > 1:
+            return self.df['Point'].iloc[0].split('_')[0]
+        else:
+            return 'Noline'
+
+    @property
+    def CombList(self):
+        return list(self.df['Comb'])
+
+    @property
     def CoordinateXYZ(self):
         return (self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0])
 
@@ -357,7 +368,10 @@ class support_respoint():
             return False
 
     def __str__(self):
-        return self.Point + ',' + self.Type
+        X = self.CoordinateXYZ[0].round(2)
+        Y = self.CoordinateXYZ[1].round(2)
+        Z = self.CoordinateXYZ[2].round(2)
+        return self.Point + ',' + self.Type + ' at [%s, %s, %s]'%(X, Y, Z)
 
 #test if main
 if __name__ == '__main__': 

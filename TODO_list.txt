@@ -1,9 +1,16 @@
 TODO:
-- xxxxxxxx
-
+- test for diferent combs for lines
+- remove or finish moments
+- load more than on xlsx at one time
+- cheking if xlsx file is in expected format
+- clean up code
+- remove moment
+- dxf export upgrade
 
 In progress:
 
 
-
 Done:
+- clean up reports
+- alert that point with this name is already loaded
+- geting units

@@ -20,12 +20,19 @@
       <item>
        <widget class="QPushButton" name="pushButton_load">
         <property name="text">
-         <string>add excel data</string>
+         <string>&gt;add excel data&lt;</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_clear">
+       <widget class="QCheckBox" name="checkBox_line_name">
+        <property name="text">
+         <string>load line name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_clear_data">
         <property name="text">
          <string>clear data</string>
         </property>
@@ -65,16 +72,16 @@ AG5</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_Sort">
+       <widget class="QPushButton" name="pushButton_clear_list">
         <property name="text">
-         <string>sort list</string>
+         <string>clear list</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_getMembers">
+       <widget class="QPushButton" name="pushButton_Sort">
         <property name="text">
-         <string>get all points</string>
+         <string>sort list</string>
         </property>
        </widget>
       </item>
@@ -86,14 +93,24 @@ AG5</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_getMembers">
+        <property name="text">
+         <string>add all available</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton_find_by_type">
         <property name="text">
-         <string>find all by types</string>
+         <string>add by criteria</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QComboBox" name="comboBox_Type"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_Line"/>
       </item>
      </layout>
     </item>
@@ -113,10 +130,24 @@ AG5</string>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_method"/>
+             <widget class="QComboBox" name="comboBox_method">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_method_value"/>
+             <widget class="QComboBox" name="comboBox_method_value">
+              <property name="minimumSize">
+               <size>
+                <width>90</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -177,20 +208,6 @@ AG5</string>
                   <height>0</height>
                  </size>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="comboBox_plt_mf">
-                <item>
-                 <property name="text">
-                  <string>force</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>moment</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item>

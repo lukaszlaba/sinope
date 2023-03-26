@@ -20,11 +20,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 --------------------------------------------------------------------------
 
 '''
-
 import os
 import sys
 
-import openpyxl #pandas need this!!
+import openpyxl #pandas need this!
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog
@@ -47,10 +46,9 @@ opendir = os.path.dirname(__file__)#dir path for save and open
 filename = None
 
 support_dict = {}
-excel_data_df = None
 
 
-version = 'sinope 0.0.2'
+version = 'sinope 0.1.0'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -59,17 +57,19 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         #--
         self.ui.pushButton_Report.clicked.connect(show_report)
-        # #--
+        #--
         self.ui.pushButton_plt_show.clicked.connect(plot3D)
         self.ui.pushButton_dxf.clicked.connect(save_as_dxf)
         #
-        # #--
+        #--
         self.ui.pushButton_Sort.clicked.connect(sort_pointlist)
         self.ui.pushButton_getMembers.clicked.connect(load_memberlist_from_results)
         self.ui.pushButton_find_by_type.clicked.connect(find_by_types)
         self.ui.pushButton_check.clicked.connect(check_pointlist)
-        # #--
+        self.ui.pushButton_clear_list.clicked.connect(clear_list)
+        #--
         self.ui.pushButton_load.clicked.connect(loaddata)
+        self.ui.pushButton_clear_data.clicked.connect(clear_data)
         #--
         self.ui.pushButton_info.clicked.connect(info)
         self.ui.pushButton_print.clicked.connect(print_report)
@@ -79,8 +79,10 @@ class MAINWINDOW(QtWidgets.QMainWindow):
 def ui_update():
     if myapp.ui.comboBox_method.currentIndex() == 0:
         myapp.ui.comboBox_method_value.setDisabled(True)
+        myapp.ui.checkBox_full.setDisabled(True)
     else:
         myapp.ui.comboBox_method_value.setDisabled(False)
+        myapp.ui.checkBox_full.setDisabled(False)
     #---
     if myapp.ui.comboBox_method.currentIndex() == 2:
         myapp.ui.comboBox_method_value.clear()
@@ -100,6 +102,7 @@ def loaddata():
     #---asking for filename
     global opendir
     global filename
+    #---
     filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".xlsx' (*.xlsx)")[0]
     #filepath = 'C:/testdata.xlsx'
     #filepath = '/home/lul/Downloads/test.xlsx'
@@ -108,16 +111,25 @@ def loaddata():
         opendir = os.path.dirname(filepath)
         filename = os.path.basename(filepath)
     #'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+    #---
+    myapp.ui.textBrowser_output.setText('')
+    load_report = 'Loading started.. \n'
+    myapp.ui.textBrowser_output.setText(load_report)
     #---geting data from selected file
-    global excel_data_df
     global support_dict
     excel_data_df = pandas.read_excel(filepath, sheet_name='SUPPORTS')
     #---adding line prefix
-    file_name = os.path.basename(filepath)
-    file_name = file_name.split('.')[0]
-    line_name = file_name.split('_')[0]
-    print(line_name)
-    excel_data_df['Point'] = line_name + '_' +excel_data_df['Point']
+    if myapp.ui.checkBox_line_name.isChecked():
+        file_name = os.path.basename(filepath)
+        file_name = file_name.split('.')[0]
+        if len(file_name.split('_'))>1:
+            line_name = file_name.split('_')[0]
+            excel_data_df['Point'] = line_name + '_' +excel_data_df['Point']
+            load_report += 'pipe line name %s found in excel file name \n'%line_name
+            myapp.ui.textBrowser_output.setText(load_report)
+        else:
+            load_report += 'no pipe line name found in excel file name \n'
+            myapp.ui.textBrowser_output.setText(load_report)
     #----
     list_of_points = excel_data_df['Point'].drop_duplicates().tolist()
     excel_data_df = excel_data_df.rename(columns={  'SumOfBuildingFX': 'FX',
@@ -135,34 +147,99 @@ def loaddata():
     #----
     for point in list_of_points:
         df1 = excel_data_df[excel_data_df['Point'] == point]
+        #---
+        if point in support_dict.keys():
+            load_report += point + ' already exist, data overwritten (!!!) \n'
+            myapp.ui.textBrowser_output.setText(load_report)
+        #---
         support_dict[point] = support_respoint(df1)
-    #---pushing supports types to combobox
-    point_types = excel_data_df['Type'].drop_duplicates().tolist()
+    #---pushing supports type list to combobox
+    type_list = []
+    for key in support_dict.keys():
+        s = support_dict[key]
+        type_list.append(s.Type)
+    type_list = list(set(type_list))
+    type_list.sort()
+    if len(type_list)>1: type_list.append('any')
     myapp.ui.comboBox_Type.clear()
-    myapp.ui.comboBox_Type.addItems(point_types)
-    #---pushing combination mames to combobox
-    point_types = excel_data_df['Comb'].drop_duplicates().tolist()
+    myapp.ui.comboBox_Type.addItems(type_list)
+    #---pushing line list to combobox
+    line_list = []
+    for key in support_dict.keys():
+        s = support_dict[key]
+        line = s.Line
+        line_list.append(line)
+    line_list = list(set(line_list))
+    line_list.sort()
+    if len(line_list)>1: line_list.append('any')
+    myapp.ui.comboBox_Line.clear()
+    myapp.ui.comboBox_Line.addItems(line_list)
+    #---pushing combination names to combobox
+    comb_list = []
+    for key in support_dict.keys():
+        s = support_dict[key]
+        comb_list += s.CombList
+    comb_list = list(set(comb_list))
+    comb_list.sort()
     myapp.ui.comboBox_plt_comb.clear()
-    myapp.ui.comboBox_plt_comb.addItems(point_types)
-    #---adding filename to app window title
-    set_title(filename)
-    #--geting units TODO
+    myapp.ui.comboBox_plt_comb.addItems(comb_list)
+    #--geting units
     global unit_force
     global unit_moment
     global unit_coord
-    unit_force = '[lbs]'
+    #-------looking for force unit
+    try:
+        excel_data_df = pandas.read_excel(filepath, sheet_name='SUMMARY')
+        loc = [x[1:] for x in ((v, i, j) for i, row_tup in enumerate(excel_data_df.itertuples(index=False)) for j, v in enumerate(row_tup)) if "Forces (Fx, Fy, Fz):" in str(x[0])]
+        index = loc[0][0]
+        col = loc[0][1] + 1
+        unit_force = '[' + excel_data_df[excel_data_df.columns[col]][index] + ']'
+        load_report +=  unit_force + 'force unit found \n'
+        myapp.ui.textBrowser_output.setText(load_report)
+    except:
+        unit_force = '[lbs]'
+        load_report +=  'force unit not found, default ' + unit_force + ' used (!!!!) \n'
+        myapp.ui.textBrowser_output.setText(load_report)
+    #-------looking for moment unit (moment not used for now)
     unit_moment = '[ft-lbs]'
-    unit_coord = '[inch]'
-    #--display status infor
-    myapp.ui.textBrowser_output.setText('>>>> %s support point data loaded from %s <<<<'%(len(support_dict.keys()), filename))
+    #-------looking for coordination unit
+    try:
+        excel_data_df = pandas.read_excel(filepath, sheet_name='SUMMARY')
+        #https://stackoverflow.com/questions/53856763/get-row-and-column-in-pandas-for-a-cell-with-a-certain-value
+        loc = [x[1:] for x in ((v, i, j) for i, row_tup in enumerate(excel_data_df.itertuples(index=False)) for j, v in enumerate(row_tup)) if "Coordinates:" in str(x[0])]
+        index = loc[0][0]
+        col = loc[0][1] + 1 # column on the right to where the force unit tag found
+        unit_coord = '[' + excel_data_df[excel_data_df.columns[col]][index] + ']'
+        load_report +=  unit_coord + 'coordinate unit found \n'
+        myapp.ui.textBrowser_output.setText(load_report)
+    except:
+        unit_coord = '[in]'
+        load_report +=  'coordinate unit not found, default ' + unit_force + ' used (!!!!) \n'
+        myapp.ui.textBrowser_output.setText(load_report)
+    #--display load report
+    load_report += '%s support point data added from %s'%(len(list_of_points), filename)
+    myapp.ui.textBrowser_output.setText(load_report)
+    set_title()
+
+def clear_data():
+    global support_dict
+    support_dict = {}
+    myapp.ui.comboBox_Type.clear()
+    myapp.ui.comboBox_Line.clear()
+    myapp.ui.comboBox_plt_comb.clear()
+    myapp.ui.plainTextEdit_serch.clear()
+    myapp.ui.textBrowser_output.setText('')
+    set_title()
 
 #OK
 def find_by_types():
     selected_type = myapp.ui.comboBox_Type.currentText()
+    selected_line = myapp.ui.comboBox_Line.currentText()
     searchlist = []
     for point in support_dict:
-        if support_dict[point].Type == selected_type:
-            searchlist.append(point)
+        if support_dict[point].Type == selected_type or selected_type == 'any':
+                if support_dict[point].Line == selected_line or selected_line == 'any':
+                    searchlist.append(point)
     set_pointlist(searchlist)
     sort_pointlist()
 
@@ -177,7 +254,13 @@ def get_pointlist():
     return memberlist
 
 #OK
+def clear_list():
+    myapp.ui.plainTextEdit_serch.clear()
+
+#OK
 def set_pointlist(mlist):
+    curent_list = get_pointlist()
+    mlist = curent_list + mlist
     out_text = ''
     for i in mlist:
         out_text += i + '\n'
@@ -188,6 +271,7 @@ def set_pointlist(mlist):
 def sort_pointlist():
     mlist = get_pointlist()
     mlist.sort()
+    myapp.ui.plainTextEdit_serch.clear()
     set_pointlist(mlist)
 #OK
 def check_pointlist():
@@ -243,11 +327,14 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
     return report
 
 def merged_summ_reaction_report(filterlist=['AG01', 'AG05']):
-    if myapp.ui.comboBox_method_value.currentText() == 'env-': support_respoint.switch_merge_method_to_min()
-    if myapp.ui.comboBox_method_value.currentText() == 'env+': support_respoint.switch_merge_method_to_max()
-    if myapp.ui.comboBox_method_value.currentText() == 'max_abs': support_respoint.switch_merge_method_to_abs()
-    if myapp.ui.comboBox_method_value.currentText() == 'direct_summ': support_respoint.switch_merge_method_to_direct()
-    #---------------
+    env_option = myapp.ui.comboBox_method_value.currentText()
+    if env_option == 'env-': support_respoint.switch_merge_method_to_min()
+    if env_option == 'env+': support_respoint.switch_merge_method_to_max()
+    if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
+    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    #---
+    report = 'Method: summ in to one, %s \n\n'%env_option
+    #---
     if myapp.ui.comboBox_method_value.currentText() == 'env+/-':
         #min option
         support_respoint.switch_merge_method_to_min()
@@ -259,23 +346,23 @@ def merged_summ_reaction_report(filterlist=['AG01', 'AG05']):
         outpoint_max  = support_respoint()
         for i in filterlist:
             outpoint_max += support_dict[i]
-        report = 'MIN-MAX' + '\n'
-        report += join_min_max(outpoint_min, outpoint_max) + '\n\n'
+        report += join_min_max(outpoint_min, outpoint_max) + '\n'
     else:
-        report = ''
         outpoint  = support_respoint()
         for i in filterlist:
             outpoint += support_dict[i]
-        report += str(outpoint) + '\n'
-        report += outpoint.Bese_reactions.round(2).to_string(index=False) + '\n\n'
+        report += outpoint.Bese_reactions.round(2).to_string(index=False) + '\n'
     return report
 
 def merged_replacement_reaction_report(filterlist=['AG01', 'AG05']):
-    if myapp.ui.comboBox_method_value.currentText() == 'env-': support_respoint.switch_merge_method_to_min()
-    if myapp.ui.comboBox_method_value.currentText() == 'env+': support_respoint.switch_merge_method_to_max()
-    if myapp.ui.comboBox_method_value.currentText() == 'max_abs': support_respoint.switch_merge_method_to_abs()
-    if myapp.ui.comboBox_method_value.currentText() == 'direct_summ': support_respoint.switch_merge_method_to_direct()
-    #---------------
+    env_option = myapp.ui.comboBox_method_value.currentText()
+    if env_option == 'env-': support_respoint.switch_merge_method_to_min()
+    if env_option == 'env+': support_respoint.switch_merge_method_to_max()
+    if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
+    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    #---
+    report = 'Method: one replacement, %s \n\n'%env_option
+    #---
     if myapp.ui.comboBox_method_value.currentText() == 'env+/-':
         #min option
         support_respoint.switch_merge_method_to_min()
@@ -287,15 +374,12 @@ def merged_replacement_reaction_report(filterlist=['AG01', 'AG05']):
         outpoint_max  = support_respoint()
         for i in filterlist:
             outpoint_max *= support_dict[i]
-        report = 'MIN-MAX' + '\n'
-        report += join_min_max(outpoint_min, outpoint_max) + '\n\n'
+        report += join_min_max(outpoint_min, outpoint_max) + '\n'
     else:
-        report = ''
         outpoint  = support_respoint()
         for i in filterlist:
             outpoint *= support_dict[i]
-        report += str(outpoint) + '\n'
-        report += outpoint.Bese_reactions.round().to_string(index=False) + '\n\n'
+        report += outpoint.Bese_reactions.round().to_string(index=False) + '\n'
     return report
 
 def join_min_max (p_min, p_max):
@@ -334,6 +418,14 @@ def join_min_max (p_min, p_max):
     out_p = support_respoint(out_df)
     return out_p.Bese_reactions.round().to_string(index=False)
 
+def list_to_compact_string(mlist = ['A01', 'A23', 'AA06', 'AA07', 'AA08', 'AA09', 'AA10']):
+    out_text = str(mlist)
+    out_text = out_text.replace("'", '')
+    out_text = out_text.replace("[", '')
+    out_text = out_text.replace("]", '')
+    return out_text
+
+
 def show_report():
     if is_pointlist_empty():
         check_pointlist()
@@ -344,32 +436,32 @@ def show_report():
     #------
     mlist = get_pointlist()
     report = ''
-    sourcefile = filename
-    report += 'Data source - ' + sourcefile + '\n'
-    report += 'Results for  - ' + str(mlist)
+    report += 'Results for pipe supports  - ' + list_to_compact_string(mlist)
     report += '\n\n'
     #report += 'FX FY FZ MX MY MZ are PASS format reaction forces\n'
     report += 'FX FY FZ are PASS format reaction forces\n'
-    report += 'Force unit - %s '%(unit_force)
-    report += '\n\n'
+    report += 'Force unit - %s \n'%(unit_force)
+    report += 'Coordinate unit - %s \n '%(unit_coord)
+    report += '\n'
     #------------------
     if myapp.ui.checkBox_full.isChecked() or myapp.ui.comboBox_method.currentText() == 'keep separeted':
-        report += 'Pass format one by one from selected list table:\n'
-        report += base_reaction_report(mlist) + '\n'
+        report += '----------------------------------------------\n\n'
+        report += 'PSAS format one by one for selected list of supports\n\n'
+        report += base_reaction_report(mlist)
     # checking what type of summary selected
     if myapp.ui.comboBox_method.currentText() == 'summ in to one':
-        report += 'The merged result for selcted\n'
+        report += '----------------------------------------------\n\n'
+        report += "Merged result for selcted\n"
         report += merged_summ_reaction_report(mlist) + '\n'
-        report += '\n'
     if myapp.ui.comboBox_method.currentText() == 'one replacement':
-        report += 'The merged result for selcted\n'
+        report += '----------------------------------------------\n\n'
+        report += 'Merged result for selcted\n'
         report += merged_replacement_reaction_report(mlist) + '\n'
-        report += '\n'    # report += 'Extreme cases list:\n'
+    report += '----------------------------------------------\n\n'
     myapp.ui.textBrowser_output.setText(report)
 
 def plot3D():
     comb = myapp.ui.comboBox_plt_comb.currentText()
-    force_type = myapp.ui.comboBox_plt_mf.currentText()
     #-----
     X0=[]
     X1=[]
@@ -381,8 +473,7 @@ def plot3D():
     max_value = 0
     for s_name in get_pointlist():
         s = support_dict[s_name]
-        if force_type == 'force': vector = s.get_force_vector(comb)
-        if force_type == 'moment': vector = s.get_force_vector(comb)
+        vector = s.get_force_vector(comb)
         if vector:
             print(vector)
             X0.append(0)
@@ -400,15 +491,10 @@ def plot3D():
     ax.set_xlim([-max_value, max_value])
     ax.set_ylim([-max_value, max_value])
     ax.set_zlim([-max_value, max_value])
-    if force_type == 'force':
-        ax.set_xlabel("Fx " + unit_force)
-        ax.set_ylabel("Fy " + unit_force)
-        ax.set_zlabel("Fz " + unit_force)
-    if force_type == 'moment':
-        ax.set_xlabel("Mx " + unit_moment)
-        ax.set_ylabel("My " + unit_moment)
-        ax.set_zlabel("Mz " + unit_moment)
-    ax.set_title(comb + '-' + force_type)
+    ax.set_xlabel("Fx " + unit_force)
+    ax.set_ylabel("Fy " + unit_force)
+    ax.set_zlabel("Fz " + unit_force)
+    ax.set_title('Combination - ' + comb)
     if myapp.ui.checkBox_pltAnnot.isChecked():
         for i in range(len(X1)):
             ax.text(X1[i], Y1[i], Z1[i], label[i])
@@ -419,7 +505,7 @@ def save_as_dxf():
         myapp.ui.textBrowser_output.setText('Load excel data first!')
         return 0
     try:
-        dxf_filename = filename.split('.')[0]
+        dxf_filename = 'sinope_report'
         dxf_filename = dxf_filename + '.dxf'
         filenamepath = os.path.join(opendir, dxf_filename)
         drawing = dxf.drawing(filenamepath)
@@ -438,7 +524,7 @@ def save_as_dxf():
 
         for key in support_dict.keys():
             s = support_dict[key]
-            text = dxf.mtext(s.Point + s.Bese_reactions.to_string(), s.CoordinateXYZ, height=0.01, rotation=0)
+            text = dxf.mtext(s.Point + '\n' + unit_force + '\n' + s.Bese_reactions.round(2).to_string(index=False), s.CoordinateXYZ, height=0.01, rotation=0)
             text['layer'] = layer_name
             drawing.add(text)
         drawing.save()
@@ -452,6 +538,11 @@ def print_report():
         myapp.ui.textBrowser_output.document().print_(print_dialog.printer())
 
 def set_title(info=''):
+    if not info:
+        if support_dict:
+            info = 'data loaded'
+        else:
+            info = 'no data loaded'
     if info:
         myapp.setWindowTitle(version + ' - ' + info)
     else:
@@ -488,7 +579,6 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.addItems(['one replacement'])
     ui_update()
     myapp.ui.comboBox_method.setCurrentIndex(2)
-    myapp.ui.comboBox_plt_mf.setEnabled(False)
     myapp.show()
     #loaddata()
     # s1 = support_dict[list(support_dict.keys())[0]]

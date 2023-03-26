@@ -7,13 +7,16 @@ Sinope - J-ConMP stress pipe reaction analysis app
 
 Changelog
 ---------
+Sinope 0.1.0
+  - general upgrade
+  - beta stage
 
-Sinope 0.0.1 (poc stage for testing)
-  - proof of concept stage
-
-Sinope 0.0.2 (poc stage for testing)
+Sinope 0.0.2
   - dxf export feature added
   - alpha stage
+
+Sinope 0.0.1
+  - proof of concept stage
 
 Description
 -----------
