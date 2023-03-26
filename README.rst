@@ -31,7 +31,7 @@ Link to windows binaries download is shown below.
 
 https://github.com/lukaszlaba/sinope/releases
 
-You can also run it by using Python engine. After the Python and needed libraries was installed, just run sinope.py file. Soco is  based on Python 3 and non-standard Python libraries pyqt5, matplotlib, pandas, dxfwrite.
+You can also run it by using Python engine. After the Python and needed libraries was installed, just run sinope.py file. Sinope is based on Python 3 and non-standard Python libraries pyqt5, matplotlib, pandas, dxfwrite.
 
 License
 -------

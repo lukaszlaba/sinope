@@ -1,10 +1,9 @@
 TODO:
-- test for diferent combs for lines
+- test for different combinations for lines
 - remove or finish moments
-- load more than on xlsx at one time
-- cheking if xlsx file is in expected format
+- load more than one xlsx at one time
+- checking if xlsx file is in expected format
 - clean up code
-- remove moment
 - dxf export upgrade
 
 In progress:
@@ -12,5 +11,5 @@ In progress:
 
 Done:
 - clean up reports
-- alert that point with this name is already loaded
-- geting units
+- alert that point with this name was already loaded
+- getting units
