@@ -31,8 +31,11 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
-from mainwindow_ui import Ui_MainWindow
+from mainwindow_ui_1 import Ui_MainWindow
 from support_respoint import support_respoint
+
+import staadTemplate_PYT
+import staadTemplate_JDC
 
 import pandas
 
@@ -46,6 +49,12 @@ opendir = os.path.dirname(__file__)#dir path for save and open
 filename = None
 
 support_dict = {}
+
+#---
+available_staad_templates = ['PYT', 'JDC']
+load_case_list = []
+ucs_transform_possible = []
+get_staad_commend = None
 
 
 version = 'sinope 0.1.0'
@@ -75,6 +84,8 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_print.clicked.connect(print_report)
         #--
         self.ui.comboBox_method.currentIndexChanged.connect(ui_update)
+        self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update)
+        self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
 
 def ui_update():
     if myapp.ui.comboBox_method.currentIndex() == 0:
@@ -97,6 +108,25 @@ def ui_update():
         myapp.ui.comboBox_method_value.addItems(['env+/-'])
         myapp.ui.comboBox_method_value.addItems(['max_abs'])
         myapp.ui.comboBox_method_value.addItems(['direct_summ'])
+    #---
+    set_template()
+
+def set_template():
+    global load_case_list
+    global ucs_transform_possible
+    global get_staad_commend
+    if myapp.ui.comboBox_staadTemplate.currentText() == 'PYT':
+        load_case_list = staadTemplate_PYT.load_case_list
+        ucs_transform_possible = staadTemplate_PYT.ucs_transform_possible
+        get_staad_commend = staadTemplate_PYT.get_staad_commend
+    if myapp.ui.comboBox_staadTemplate.currentText() == 'JDC':
+        load_case_list = staadTemplate_JDC.load_case_list
+        ucs_transform_possible = staadTemplate_JDC.ucs_transform_possible
+        get_staad_commend = staadTemplate_JDC.get_staad_commend
+    myapp.ui.comboBox_staadLC.clear()
+    myapp.ui.comboBox_staadLC.addItems(load_case_list + ['All'])
+    myapp.ui.comboBox_staadUCS.clear()
+    myapp.ui.comboBox_staadUCS.addItems(ucs_transform_possible)
 
 def loaddata():
     #---asking for filename
@@ -244,13 +274,24 @@ def find_by_types():
     sort_pointlist()
 
 #OK
-def get_pointlist():
+def get_pointlist(splited = False):
     text = myapp.ui.plainTextEdit_serch.toPlainText()
     memberlist = list(text.split("\n"))
     memberlist = list(dict.fromkeys(memberlist)) # delete duplicates
     while '' in memberlist:
         memberlist.remove('')
     memberlist = ["".join(i.rstrip().lstrip()) for i in memberlist] # delete spaces at start and end
+    if splited:
+        memberlist  = [i.split('@')[0] for i in memberlist]
+    return memberlist
+
+#OK
+def get_staadpointlist():
+    memberlist = get_pointlist(splited = False)
+    while '' in memberlist:
+        memberlist.remove('')
+    memberlist = ["".join(i.rstrip().lstrip()) for i in memberlist] # delete spaces at start and end
+    memberlist  = [i.split('@')[1] if '@' in i else '' for i in memberlist]
     return memberlist
 
 #OK
@@ -287,11 +328,12 @@ def check_pointlist():
         report += '!!! PROBLEM !!!! some data not found - please correct the list\n'
     report += '---------------------------------------------------------------------' + '\n'
 
-    for i in get_pointlist():
+    for i in get_pointlist(splited = True):
         if i in support_dict.keys():
             point = support_dict[i]
             report += str(i) + ' - OK - ' + str(point) + '\n'
         else:
+            print(i)
             report += str(i) + ' - !!!!!!NO DATA FOUND!!!!!!!<<<<<<<<<<<<<<<<<<<<<<\n'
     myapp.ui.textBrowser_output.setText(report)
 
@@ -303,7 +345,7 @@ def is_pointlist_empty():
         return True
 #OK
 def data_for_pointlist_exist():
-    if list(set(get_pointlist())-set(support_dict.keys())):
+    if list(set(get_pointlist(splited = True))-set(support_dict.keys())):
         return False
     else:
         return True
@@ -434,7 +476,7 @@ def show_report():
         check_pointlist()
         return None
     #------
-    mlist = get_pointlist()
+    mlist = get_pointlist(splited = True)
     report = ''
     report += 'Results for pipe supports  - ' + list_to_compact_string(mlist)
     report += '\n\n'
@@ -460,6 +502,43 @@ def show_report():
     report += '----------------------------------------------\n\n'
     myapp.ui.textBrowser_output.setText(report)
 
+
+def show_staad_input():
+    if is_pointlist_empty():
+        check_pointlist()
+        return None
+    if not data_for_pointlist_exist():
+        check_pointlist()
+        return None
+    #------
+    psas_point_list = get_pointlist(splited = True)
+    staad_point_list = get_staadpointlist()
+    LC_list = []
+    if myapp.ui.comboBox_staadLC.currentText() == 'All':
+        LC_list = load_case_list
+    else:
+        LC_list = [myapp.ui.comboBox_staadLC.currentText()]
+    #------
+    report = ''
+    #------
+    for LC in LC_list :
+        report += '\n'
+        report += '----------------------------STAAD LOAD CASE %s-------------------------------------\n'%LC
+        report += '\n'
+        report += '*Staad input for Load Case ' + LC  + '\n'
+        report += 'JOINT LOAD\n'
+        for psas_point, staad_point in zip(psas_point_list, staad_point_list):
+            respoint = support_dict[psas_point]
+            staadPointNumber = staad_point
+            if not staadPointNumber: staadPointNumber = '!NoNode!'
+            ucsTransform = myapp.ui.comboBox_staadUCS.currentText()
+            psasForceUnit = unit_force
+            staadForceUnit = '[%s]'%myapp.ui.comboBox_staadUnit.currentText()
+            psas_W_direction = myapp.ui.comboBox_staadPsasWE.currentText()
+            report += get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction)
+            report += '\n'
+    myapp.ui.textBrowser_output.setText(report)
+
 def plot3D():
     comb = myapp.ui.comboBox_plt_comb.currentText()
     #-----
@@ -471,7 +550,7 @@ def plot3D():
     Z1=[]
     label = []
     max_value = 0
-    for s_name in get_pointlist():
+    for s_name in get_pointlist(splited = True):
         s = support_dict[s_name]
         vector = s.get_force_vector(comb)
         if vector:
@@ -511,20 +590,12 @@ def save_as_dxf():
         drawing = dxf.drawing(filenamepath)
         layer_name = 'sinope'
         drawing.add_layer(layer_name, color=2)
-
-        # text = dxf.text('Text', (2, 2, 0), height=5.0, rotation=0)
-        # text['layer'] = 'Xxxx'
-        # text['color'] = 5
-        # drawing.add(text)
-
-        # line = dxf.line((0, 0, 0), (10, 10, 10))
-        # line['layer'] = 'Xxxx'
-        # line['color'] = 3
-        # drawing.add(line)
-
         for key in support_dict.keys():
             s = support_dict[key]
-            text = dxf.mtext(s.Point + '\n' + unit_force + '\n' + s.Bese_reactions.round(2).to_string(index=False), s.CoordinateXYZ, height=0.01, rotation=0)
+            if myapp.ui.checkBox_DxfPointsOnly.isChecked():
+                text = dxf.text(s.Point, s.CoordinateXYZ, height=0.1, rotation=0)
+            else:
+                text = dxf.mtext(s.Point + '\n' + unit_force + '\n' + s.Bese_reactions.round(2).to_string(index=False), s.CoordinateXYZ, height=0.1, rotation=0)
             text['layer'] = layer_name
             drawing.add(text)
         drawing.save()
@@ -574,9 +645,16 @@ if __name__ == '__main__':
     myapp.ui.textBrowser_output.setText('Welcome in sinope - J-ConMP stress pipe reaction analysis app. Load data and fill input list to get report.')
     myapp.ui.plainTextEdit_serch.clear()
     myapp.setWindowIcon(QtGui.QIcon('app.ico'))
+    #----------------------------------------------------
     myapp.ui.comboBox_method.addItems(['keep separeted'])
     myapp.ui.comboBox_method.addItems(['summ in to one'])
     myapp.ui.comboBox_method.addItems(['one replacement'])
+    #----------------------------------------------------
+    myapp.ui.comboBox_staadTemplate.addItems(available_staad_templates)
+    myapp.ui.comboBox_staadUnit.addItems(['kip', 'lbs', 'kN'])
+    myapp.ui.comboBox_staadPsasWE.addItems(['x', 'y'])
+    set_template()
+    #-----------------------------------------------------
     ui_update()
     myapp.ui.comboBox_method.setCurrentIndex(2)
     myapp.show()

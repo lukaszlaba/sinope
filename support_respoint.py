@@ -28,6 +28,7 @@ class support_respoint():
     
     def __init__(self, data=pd.DataFrame({'A' : []})):
         self.df = data
+        self.staadPoint = ''
 
     def __add__(self, other):
         if self.df.empty:
@@ -317,8 +318,10 @@ class support_respoint():
         return self.df.loc[:,to_get_list]
     
     def get_force_value(self, Comb_name='E(UP)', Force_name='FX'):
-        value = float(self.df.loc[self.df['Comb'] == Comb_name][Force_name])
-        
+        value = None
+        for LC in self.CombList:
+            if Comb_name.split('{')[0].replace(' ','') == LC.split('{')[0].replace(' ',''):
+                value = float(self.df.loc[self.df['Comb'] == LC][Force_name])
         if str(value) != str(float("nan")):
             return value
         else:
@@ -328,7 +331,7 @@ class support_respoint():
         FX = self.get_force_value(Comb_name, 'FX')
         FY = self.get_force_value(Comb_name, 'FY')
         FZ = self.get_force_value(Comb_name, 'FZ')
-        if FX or FY or FZ:
+        if type(FX) == float and type(FY) == float and type(FZ) == float:
             return [FX, FY, FZ]
         else:
             return None
@@ -337,7 +340,7 @@ class support_respoint():
         MX = self.get_force_value(Comb_name, 'MX')
         MY = self.get_force_value(Comb_name, 'MY')
         MZ = self.get_force_value(Comb_name, 'MZ')
-        if MX or MY or MZ:
+        if type(MX) == float and type(MY) == float and type(MZ) == float:
             return [MX, MY, MZ]
         else:
             return None

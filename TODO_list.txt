@@ -4,12 +4,16 @@ TODO:
 - load more than one xlsx at one time
 - checking if xlsx file is in expected format
 - clean up code
-- dxf export upgrade
+- fix report
+
+
+
 
 In progress:
 
 
 Done:
+- dxf export point only option
 - clean up reports
 - alert that point with this name was already loaded
 - getting units
