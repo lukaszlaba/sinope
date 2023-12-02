@@ -521,20 +521,20 @@ def show_staad_input():
     #------
     report = ''
     #------
+    ucsTransform = myapp.ui.comboBox_staadUCS.currentText()
+    psasForceUnit = unit_force
+    staadForceUnit = '[%s]'%myapp.ui.comboBox_staadUnit.currentText()
+    psas_W_direction = myapp.ui.comboBox_staadPsasWE.currentText()
     for LC in LC_list :
         report += '\n'
         report += '----------------------------STAAD LOAD CASE %s-------------------------------------\n'%LC
         report += '\n'
-        report += '*Staad input for Load Case ' + LC  + '\n'
+        report += '*Staad input for Load Case ' + LC + ' (force unit %s)'%staadForceUnit + '\n'
         report += 'JOINT LOAD\n'
         for psas_point, staad_point in zip(psas_point_list, staad_point_list):
             respoint = support_dict[psas_point]
             staadPointNumber = staad_point
             if not staadPointNumber: staadPointNumber = '!NoNode!'
-            ucsTransform = myapp.ui.comboBox_staadUCS.currentText()
-            psasForceUnit = unit_force
-            staadForceUnit = '[%s]'%myapp.ui.comboBox_staadUnit.currentText()
-            psas_W_direction = myapp.ui.comboBox_staadPsasWE.currentText()
             report += get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction)
             report += '\n'
     myapp.ui.textBrowser_output.setText(report)
