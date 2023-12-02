@@ -31,9 +31,17 @@ def force_transform(psas_force = np.array([1, 1, 0]), ucsTransform = 'X(x)/Y(z)/
     staad_force = np.rot90(staad_force)[0]
     return staad_force
 
-def staad_poin_force_command_record(staadPointNumber, staad_force):
+def staad_poin_force_command_record(staadPointNumber, staad_force, reduceZero=False):
     command = ''
-    command += '%s FX %s FY %s FZ %s'%(staadPointNumber, staad_force[0], staad_force[1], staad_force[2])
+    if reduceZero:
+        command += '%s'%staadPointNumber
+        if staad_force[0]: command += ' FX %s'%staad_force[0]
+        if staad_force[1]: command += ' FY %s'%staad_force[1]
+        if staad_force[2]: command += ' FZ %s'%staad_force[2]
+
+        if np.all(staad_force == 0): command = '*...all forces zero, no command generated'
+    else:
+        command += '%s FX %s FY %s FZ %s'%(staadPointNumber, staad_force[0], staad_force[1], staad_force[2])
     return command
 
 def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction):
@@ -58,25 +66,37 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_Pressure3 = np.array(respoint.get_force_vector('Pressure3'))
 
         out1 =  [   max(abs(psas_Thermal1[0]), abs(psas_Pressure1[0]), abs(psas_Thermal1[0]+psas_Pressure1[0])),
-                    max(abs(psas_Thermal1[1]), abs(psas_Pressure1[1]), abs(psas_Thermal1[0]+psas_Pressure1[1])),
+                    max(abs(psas_Thermal1[1]), abs(psas_Pressure1[1]), abs(psas_Thermal1[1]+psas_Pressure1[1])),
                     max(abs(psas_Thermal1[2]), abs(psas_Pressure1[2]), abs(psas_Thermal1[2]+psas_Pressure1[2])),
                 ]
         out2 =  [   max(abs(psas_Thermal2[0]), abs(psas_Pressure2[0]), abs(psas_Thermal2[0]+psas_Pressure2[0])),
-                    max(abs(psas_Thermal2[1]), abs(psas_Pressure2[1]), abs(psas_Thermal2[0]+psas_Pressure2[1])),
+                    max(abs(psas_Thermal2[1]), abs(psas_Pressure2[1]), abs(psas_Thermal2[1]+psas_Pressure2[1])),
                     max(abs(psas_Thermal2[2]), abs(psas_Pressure2[2]), abs(psas_Thermal2[2]+psas_Pressure2[2])),
                 ]
         out3 =  [   max(abs(psas_Thermal3[0]), abs(psas_Pressure3[0]), abs(psas_Thermal3[0]+psas_Pressure3[0])),
-                    max(abs(psas_Thermal3[1]), abs(psas_Pressure3[1]), abs(psas_Thermal3[0]+psas_Pressure3[1])),
+                    max(abs(psas_Thermal3[1]), abs(psas_Pressure3[1]), abs(psas_Thermal3[1]+psas_Pressure3[1])),
                     max(abs(psas_Thermal3[2]), abs(psas_Pressure3[2]), abs(psas_Thermal3[2]+psas_Pressure3[2])),
                 ]
+
         psas_force = max(out1, out2, out3)
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
+
+        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN X DIR':
+            staad_force[1] = 0
+            staad_force[2] = 0
+        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN Y DIR':
+            staad_force[0] = 0
+            staad_force[2] = 0
+        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN Z DIR':
+            staad_force[0] = 0
+            staad_force[1] = 0
+
         std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
-        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force, reduceZero=False)
     #print(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction)
     return std_input
 
-#show_staad_input()
+show_staad_input()
 
