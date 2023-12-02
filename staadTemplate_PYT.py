@@ -105,6 +105,49 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+
+
+
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS SEISMIC IN X-DIR SAM1':
+        psas_force = respoint.get_force_vector('SAM1')
+        if not psas_force:
+            return '*!!!!!!No Seismic data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        staad_force = abs(staad_force)
+        std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS SEISMIC IN Z-DIR SAM2':
+        psas_force = respoint.get_force_vector('SAM2')
+        if not psas_force:
+            return '*!!!!!!No Seismic data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        staad_force = abs(staad_force)
+        std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #--------------------------------------------------------------------------------------------------
     if LC in ['PSAS SUSTAINED THERMAL PRESSURE IN X DIR', 'PSAS SUSTAINED THERMAL PRESSURE IN Y DIR', 'PSAS SUSTAINED THERMAL PRESSURE IN Z DIR'] :
         psas_Thermal1 = np.array(respoint.get_force_vector('Thermal1'))
@@ -195,5 +238,5 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
 
     return std_input
 
-#show_staad_input()
+show_staad_input()
 

@@ -320,7 +320,7 @@ class support_respoint():
     def get_force_value(self, Comb_name='E(UP)', Force_name='FX'):
         value = None
         for LC in self.CombList:
-            if Comb_name.split('{')[0].replace(' ','') == LC.split('{')[0].replace(' ',''):
+            if Comb_name.split('{')[0].replace(' ','').replace('.','') == LC.split('{')[0].replace(' ','').replace('.',''):
                 value = float(self.df.loc[self.df['Comb'] == LC][Force_name])
         if str(value) != str(float("nan")):
             return value
