@@ -18,8 +18,8 @@ load_case_list = [  'PSAS GRAVITY',# OK
 
                     'PSAS SNOW', # OK
 
-                    'PSAS WIND IN X DIR', #
-                    'PSAS WIND IN Z DIR' #
+                    'PSAS WIND IN X DIR', # OK
+                    'PSAS WIND IN Z DIR' # OK
                 ]
 
 
@@ -53,17 +53,13 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
     std_input = ''
     psas_point = respoint.Point
     #--------------------------------------------------------------------------------------------------
-    if LC == 'PSAS_GRAVITY':
+    if LC == 'PSAS GRAVITY':
         psas_force = respoint.get_force_vector('Gravity')
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
         std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
-
-
-
-
     #--------------------------------------------------------------------------------------------------
     if LC == 'PSAS SEISMIC IN X DIR':
         if 'X(x)' in ucsTransform:
@@ -154,11 +150,6 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         staad_force = np.round(staad_force, decimals=3)
         std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
-
-
-
-
-
     #--------------------------------------------------------------------------------------------------
     if LC == 'PSAS WIND IN X DIR':
         if 'X(x)' in ucsTransform:
@@ -204,5 +195,5 @@ def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
 
     return std_input
 
-show_staad_input()
+#show_staad_input()
 
