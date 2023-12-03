@@ -54,10 +54,9 @@ support_dict = {}
 available_staad_templates = ['PYT', 'JDC']
 load_case_list = []
 ucs_transform_possible = []
-get_staad_commend = None
-
-
-version = 'sinope 0.1.0'
+get_staad_command = None
+#---
+version = 'sinope 0.2.1'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -91,9 +90,11 @@ def ui_update():
     if myapp.ui.comboBox_method.currentIndex() == 0:
         myapp.ui.comboBox_method_value.setDisabled(True)
         myapp.ui.checkBox_full.setDisabled(True)
+        myapp.ui.pushButton_staadGet.setEnabled(True) #for now as no other option availabale
     else:
         myapp.ui.comboBox_method_value.setDisabled(False)
         myapp.ui.checkBox_full.setDisabled(False)
+        myapp.ui.pushButton_staadGet.setDisabled(True) #for now as no other option availabale
     #---
     if myapp.ui.comboBox_method.currentIndex() == 2:
         myapp.ui.comboBox_method_value.clear()
@@ -114,15 +115,15 @@ def ui_update():
 def set_template():
     global load_case_list
     global ucs_transform_possible
-    global get_staad_commend
+    global get_staad_command
     if myapp.ui.comboBox_staadTemplate.currentText() == 'PYT':
         load_case_list = staadTemplate_PYT.load_case_list
         ucs_transform_possible = staadTemplate_PYT.ucs_transform_possible
-        get_staad_commend = staadTemplate_PYT.get_staad_commend
+        get_staad_command = staadTemplate_PYT.get_staad_command
     if myapp.ui.comboBox_staadTemplate.currentText() == 'JDC':
         load_case_list = staadTemplate_JDC.load_case_list
         ucs_transform_possible = staadTemplate_JDC.ucs_transform_possible
-        get_staad_commend = staadTemplate_JDC.get_staad_commend
+        get_staad_command = staadTemplate_JDC.get_staad_command
     myapp.ui.comboBox_staadLC.clear()
     myapp.ui.comboBox_staadLC.addItems(load_case_list + ['All'])
     myapp.ui.comboBox_staadUCS.clear()
@@ -535,7 +536,7 @@ def show_staad_input():
             respoint = support_dict[psas_point]
             staadPointNumber = staad_point
             if not staadPointNumber: staadPointNumber = '!NoNode!'
-            report += get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction)
+            report += get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction)
             report += '\n'
     myapp.ui.textBrowser_output.setText(report)
 
@@ -654,9 +655,10 @@ if __name__ == '__main__':
     myapp.ui.comboBox_staadUnit.addItems(['kip', 'lbs', 'kN'])
     myapp.ui.comboBox_staadPsasWE.addItems(['x', 'y'])
     set_template()
+    myapp.ui.comboBox_staadTemplate.setDisabled(True) #for now as only one template available
     #-----------------------------------------------------
     ui_update()
-    myapp.ui.comboBox_method.setCurrentIndex(2)
+    myapp.ui.comboBox_method.setCurrentIndex(0)
     myapp.show()
     #loaddata()
     # s1 = support_dict[list(support_dict.keys())[0]]

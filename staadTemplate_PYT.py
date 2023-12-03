@@ -41,7 +41,7 @@ def staad_poin_force_command_record(staadPointNumber, staad_force, reduceZero=Fa
         command += '%s FX %s FY %s FZ %s'%(staadPointNumber, staad_force[0], staad_force[1], staad_force[2])
     return command
 
-def get_staad_commend(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction):
+def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUnit, staadForceUnit, psas_W_direction):
     forceFactor = units[psasForceUnit] / units[staadForceUnit]
     std_input = ''
     psas_point = respoint.Point
