@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
-from mainwindow_ui_1 import Ui_MainWindow
+from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
 
 import staadTemplate_PYT
@@ -623,7 +623,7 @@ def set_title(info=''):
 def info():
     about = '''
 Sinope - J-ConMP stress pipe reaction analysis app
-Alpha stage software.
+Beta stage software.
 
 -------------Licence-------------
 Sinope is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.

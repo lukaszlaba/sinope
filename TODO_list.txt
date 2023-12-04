@@ -6,13 +6,11 @@ TODO:
 - clean up code
 - fix report
 
-
-
-
 In progress:
 
 
 Done:
+- staad input generator
 - dxf export point only option
 - clean up reports
 - alert that point with this name was already loaded
