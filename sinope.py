@@ -528,7 +528,7 @@ def show_staad_input():
     psas_W_direction = myapp.ui.comboBox_staadPsasWE.currentText()
     for LC in LC_list :
         report += '\n'
-        report += '----------------------------STAAD LOAD CASE %s-------------------------------------\n'%LC
+        report += '---------------------------------------\n'
         report += '\n'
         report += '*Staad input for Load Case ' + LC + ' (force unit %s)'%staadForceUnit + '\n'
         report += 'JOINT LOAD\n'

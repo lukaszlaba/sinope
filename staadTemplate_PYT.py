@@ -92,16 +92,6 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' using PSAS ' + seismic_dir + ' seismic'   + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
-
-
-
-
-
-
-
-
-
-
     #--------------------------------------------------------------------------------------------------
     if LC == 'PSAS SEISMIC IN Y DIR': #check the method
         psas_force_up = respoint.get_force_vector('E(UP)')
@@ -117,26 +107,6 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         std_input += '*input for ' + str(psas_point) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if LC == 'PSAS SEISMIC IN X-DIR SAM1':
         psas_force = respoint.get_force_vector('SAM1')
         if not psas_force: return '*!!!!!!No Seismic data in psas at point %s!!!!!!'%str(psas_point)
