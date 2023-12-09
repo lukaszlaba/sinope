@@ -52,7 +52,7 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        std_input += '*input for ' + str(psas_point) + ' at staad node ' + str(staadPointNumber) + '\n'
+        std_input += '*input for ' + str(psas_point) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
     if LC == 'PSAS SEISMIC IN X DIR':
