@@ -56,7 +56,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.2.2'
+version = 'sinope 0.2.3_wip'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):

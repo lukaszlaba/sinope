@@ -161,8 +161,9 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         out1=np.array(out1)
         out2=np.array(out2)
         out3=np.array(out3)
-        psas_force = np.maximum(out1, out2, out3)
+        psas_force = np.maximum(np.maximum(out1, out2), out3)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = abs(staad_force)
         staad_force = np.round(staad_force, decimals=3)
         if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN X DIR':
             staad_force[1] = 0
