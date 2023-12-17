@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1426</width>
+    <width>1460</width>
     <height>864</height>
    </rect>
   </property>
@@ -191,6 +191,13 @@ AG5</string>
               </property>
               <property name="checked">
                <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_save_point">
+              <property name="text">
+               <string>save it as new point</string>
               </property>
              </widget>
             </item>
@@ -452,8 +459,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1426</width>
-     <height>22</height>
+     <width>1460</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

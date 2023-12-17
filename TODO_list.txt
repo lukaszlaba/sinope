@@ -5,6 +5,8 @@ TODO:
 - checking if xlsx file is in expected format
 - clean up code
 - fix report
+- import point tags from dxf
+- save point option
 
 In progress:
 

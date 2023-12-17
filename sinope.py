@@ -27,6 +27,7 @@ import openpyxl #pandas need this!
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog
+from PyQt5.QtWidgets import QInputDialog, QMessageBox
 from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
@@ -65,6 +66,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         #--
         self.ui.pushButton_Report.clicked.connect(show_report)
+        self.ui.pushButton_save_point.clicked.connect(save_point)
         #--
         self.ui.pushButton_plt_show.clicked.connect(plot3D)
         self.ui.pushButton_dxf.clicked.connect(save_as_dxf)
@@ -354,8 +356,6 @@ def data_for_pointlist_exist():
 #OK
 def load_memberlist_from_results():
     mlist = list(support_dict.keys())
-    mlist = [i.replace('i','') for i in mlist]
-    mlist = [i.replace('j','') for i in mlist]
     mlist = list(dict.fromkeys(mlist))
     set_pointlist(mlist)
 
@@ -468,6 +468,35 @@ def list_to_compact_string(mlist = ['A01', 'A23', 'AA06', 'AA07', 'AA08', 'AA09'
     out_text = out_text.replace("]", '')
     return out_text
 
+def save_point():
+    global support_dict
+    #-
+    input_name_dialog = QInputDialog.getText(None, 'Saveing new point','New point name')
+    if input_name_dialog[1]:
+        point_name = input_name_dialog[0]
+    else: return
+    #-
+    env_option = myapp.ui.comboBox_method_value.currentText()
+    if env_option == 'env-': support_respoint.switch_merge_method_to_min()
+    if env_option == 'env+': support_respoint.switch_merge_method_to_max()
+    if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
+    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    #-
+    mlist = get_pointlist(splited = True)
+    #-
+    if myapp.ui.comboBox_method.currentText() == 'summ in to one':
+        outpoint  = support_respoint()
+        for i in mlist:
+            outpoint += support_dict[i]
+    if myapp.ui.comboBox_method.currentText() == 'one replacement':
+        outpoint  = support_respoint()
+        for i in mlist:
+            outpoint *= support_dict[i]
+    #-
+    outpoint.df['Point'] = point_name
+    support_dict[outpoint.Point] = outpoint
+    QMessageBox.information(None, 'Info', 'New point saved')
+#save_point()
 
 def show_report():
     if is_pointlist_empty():

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow_1.ui'
+# Form implementation generated from reading ui file 'C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1426, 864)
+        MainWindow.resize(1460, 864)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_8 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -109,6 +109,9 @@ class Ui_MainWindow(object):
         self.checkBox_full.setChecked(False)
         self.checkBox_full.setObjectName("checkBox_full")
         self.horizontalLayout_2.addWidget(self.checkBox_full)
+        self.pushButton_save_point = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_save_point.setObjectName("pushButton_save_point")
+        self.horizontalLayout_2.addWidget(self.pushButton_save_point)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_7.addLayout(self.verticalLayout_2)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
@@ -224,7 +227,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_8.addLayout(self.verticalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1426, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1460, 26))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
 
@@ -250,6 +253,7 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Select method:"))
         self.pushButton_Report.setText(_translate("MainWindow", "GENERATE PSSAS REPORT"))
         self.checkBox_full.setText(_translate("MainWindow", "long report"))
+        self.pushButton_save_point.setText(_translate("MainWindow", "save as new point"))
         self.label_2.setText(_translate("MainWindow", "3D Plot:"))
         self.pushButton_plt_show.setText(_translate("MainWindow", "show"))
         self.checkBox_pltAnnot.setText(_translate("MainWindow", "plot annotation"))
