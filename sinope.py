@@ -85,6 +85,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_print.clicked.connect(print_report)
         #--
         self.ui.comboBox_method.currentIndexChanged.connect(ui_update)
+        self.ui.comboBox_method_value.currentIndexChanged.connect(ui_2update)
         self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update)
         self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
 
@@ -113,6 +114,16 @@ def ui_update():
         myapp.ui.comboBox_method_value.addItems(['direct_summ'])
     #---
     set_template()
+
+def ui_2update():
+    if myapp.ui.comboBox_method_value.isEnabled():
+        if myapp.ui.comboBox_method_value.currentText() in ['max_abs', 'direct_summ']:
+            myapp.ui.pushButton_save_point.setEnabled(True)
+        else:
+            myapp.ui.pushButton_save_point.setDisabled(True)
+
+    else:
+        myapp.ui.pushButton_save_point.setDisabled(True)
 
 def set_template():
     global load_case_list
@@ -469,6 +480,13 @@ def list_to_compact_string(mlist = ['A01', 'A23', 'AA06', 'AA07', 'AA08', 'AA09'
     return out_text
 
 def save_point():
+    if is_pointlist_empty():
+        check_pointlist()
+        return None
+    if not data_for_pointlist_exist():
+        check_pointlist()
+        return None
+    #-
     global support_dict
     #-
     input_name_dialog = QInputDialog.getText(None, 'Saveing new point','New point name')
