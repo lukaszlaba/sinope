@@ -57,7 +57,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.2.3_wip'
+version = 'sinope 0.2.3'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -84,12 +84,12 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_info.clicked.connect(info)
         self.ui.pushButton_print.clicked.connect(print_report)
         #--
-        self.ui.comboBox_method.currentIndexChanged.connect(ui_update)
+        self.ui.comboBox_method.currentIndexChanged.connect(ui_update_1)
         self.ui.comboBox_method_value.currentIndexChanged.connect(ui_2update)
-        self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update)
+        self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update_1)
         self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
 
-def ui_update():
+def ui_update_1():
     if myapp.ui.comboBox_method.currentIndex() == 0:
         myapp.ui.comboBox_method_value.setDisabled(True)
         myapp.ui.checkBox_full.setDisabled(True)
@@ -98,13 +98,14 @@ def ui_update():
         myapp.ui.comboBox_method_value.setDisabled(False)
         myapp.ui.checkBox_full.setDisabled(False)
         myapp.ui.pushButton_staadGet.setDisabled(True) #for now as no other option availabale
-    #---
+    #---`
     if myapp.ui.comboBox_method.currentIndex() == 2:
         myapp.ui.comboBox_method_value.clear()
         myapp.ui.comboBox_method_value.addItems(['env+'])
         myapp.ui.comboBox_method_value.addItems(['env-'])
         myapp.ui.comboBox_method_value.addItems(['env+/-'])
         myapp.ui.comboBox_method_value.addItems(['max_abs'])
+        myapp.ui.comboBox_method_value.setCurrentIndex(3)
     else:
         myapp.ui.comboBox_method_value.clear()
         myapp.ui.comboBox_method_value.addItems(['env+'])
@@ -112,6 +113,7 @@ def ui_update():
         myapp.ui.comboBox_method_value.addItems(['env+/-'])
         myapp.ui.comboBox_method_value.addItems(['max_abs'])
         myapp.ui.comboBox_method_value.addItems(['direct_summ'])
+        myapp.ui.comboBox_method_value.setCurrentIndex(3)
     #---
     set_template()
 
@@ -492,7 +494,11 @@ def save_point():
     input_name_dialog = QInputDialog.getText(None, 'Saveing new point','New point name')
     if input_name_dialog[1]:
         point_name = input_name_dialog[0]
-    else: return
+    else:
+        return None
+    if not point_name:
+        myapp.ui.textBrowser_output.setText('No point added as no name specified.')
+        return None
     #-
     env_option = myapp.ui.comboBox_method_value.currentText()
     if env_option == 'env-': support_respoint.switch_merge_method_to_min()
@@ -512,9 +518,9 @@ def save_point():
             outpoint *= support_dict[i]
     #-
     outpoint.df['Point'] = point_name
+    outpoint.df['Type'] = 'N/A (created from multiple)'
     support_dict[outpoint.Point] = outpoint
-    QMessageBox.information(None, 'Info', 'New point saved')
-#save_point()
+    myapp.ui.textBrowser_output.setText('New point %s added.'%point_name)
 
 def show_report():
     if is_pointlist_empty():
@@ -549,7 +555,6 @@ def show_report():
         report += merged_replacement_reaction_report(mlist) + '\n'
     report += '----------------------------------------------\n\n'
     myapp.ui.textBrowser_output.setText(report)
-
 
 def show_staad_input():
     if is_pointlist_empty():
@@ -704,7 +709,7 @@ if __name__ == '__main__':
     set_template()
     myapp.ui.comboBox_staadTemplate.setDisabled(True) #for now as only one template available
     #-----------------------------------------------------
-    ui_update()
+    ui_update_1()
     myapp.ui.comboBox_method.setCurrentIndex(0)
     myapp.show()
     #loaddata()
