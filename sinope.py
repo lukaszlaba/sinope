@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 '''
 import os
 import sys
+import re
 
 import openpyxl #pandas need this!
 from PyQt5 import QtGui
@@ -32,7 +33,7 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
-from mainwindow_ui import Ui_MainWindow
+from mainwindow_ui1 import Ui_MainWindow
 from support_respoint import support_respoint
 
 import staadTemplate_PYT
@@ -57,7 +58,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.2.3'
+version = 'sinope 0.3.1'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -88,6 +89,7 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.comboBox_method_value.currentIndexChanged.connect(ui_2update)
         self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update_1)
         self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
+        self.ui.pushButton_Compare.clicked.connect(show_compare)
 
 def ui_update_1():
     if myapp.ui.comboBox_method.currentIndex() == 0:
@@ -292,6 +294,7 @@ def find_by_types():
 #OK
 def get_pointlist(splited = False):
     text = myapp.ui.plainTextEdit_serch.toPlainText()
+    text = text.replace('/', '\n')
     memberlist = list(text.split("\n"))
     memberlist = list(dict.fromkeys(memberlist)) # delete duplicates
     while '' in memberlist:
@@ -592,6 +595,114 @@ def show_staad_input():
             report += '\n'
     myapp.ui.textBrowser_output.setText(report)
 
+def show_compare():
+    if is_pointlist_empty():
+        check_pointlist()
+        return None
+    if not data_for_pointlist_exist():
+        check_pointlist()
+        return None
+    #------
+    t_from = myapp.ui.comboBox_tolerance_from.currentText()
+    t_from = float(t_from)/100
+    t_to = myapp.ui.comboBox_tolerance_to.currentText()
+    t_to = float(t_to)/100
+    skip_l = myapp.ui.lineEdit_skip_value_lateral.text()
+    skip_l = float(skip_l)
+    skip_v = myapp.ui.lineEdit_skip_value_vertical.text()
+    skip_v = float(skip_v)
+    #-check the skip level unit match PSAS unit
+    if unit_force == '[lbs]': pass
+    if unit_force == '[kips]':
+        skip_l = skip_l/1000
+        skip_v = skip_v/1000
+    if unit_force not in ['[lbs]', '[kips]']:
+        myapp.ui.textBrowser_output.setText('Not regognized PSAS force unit %s'%unit_force)
+        return
+    #------
+    text = myapp.ui.plainTextEdit_serch.toPlainText()
+    to_compare_list = list(text.split("\n"))
+    report = 'Compare PSAS points by using parameters %s %s %s %s \n'%(t_from, t_to, skip_l, skip_v)
+    report += 'List to be checked (new PSAS / previous PSAS): \n %s \n'%to_compare_list
+    change_list = [] # the list of compare case that shows significant differences
+    for case in to_compare_list:
+        case = case.replace(' ', '')
+        #-checking that both points are specified
+        report += '-----------------------------------------------------------------' + '\n'
+        try:
+            this = case.split('/')[0]
+            other = case.split('/')[1]
+            this = support_dict[this]
+            other = support_dict[other]
+        except:
+            report +='!!! ' + case + ' - can not get two psas point to make compare, check this record on point list !!! \n'
+            continue
+        #-starting report
+        report += case + '(%s versus %s)'%(this, other) + '\n'
+        #-show detail report for each first
+        if myapp.ui.checkBox_compare_long.isChecked():
+            report += '\n'
+            report += 'PSAS force report for both points:\n'
+            report += base_reaction_report([this.Point, other.Point])
+        #-checking the support type changed
+        report += 'List of noticed significant change:\n'
+        if this.Type != other.Type and myapp.ui.checkBox_compare_support_type_check.isChecked():
+            report += '- Support type changed from %s into %s \n'%(other.Type, this.Type)
+            change_list.append(case)
+        #-cheking forces for PSAS load cases
+        for lc in this.CombList:
+            #-geting forces for load case
+            this_FX = this.get_force_value(lc, 'FX')
+            this_FY = this.get_force_value(lc, 'FY')
+            this_FZ = this.get_force_value(lc, 'FZ')
+            other_FX = other.get_force_value(lc, 'FX')
+            other_FY = other.get_force_value(lc, 'FY')
+            other_FZ = other.get_force_value(lc, 'FZ')
+            #-----local needed function definition
+            def changed_to_much(this_value, other_value, skipValue):
+                return (abs(this_value) > skipValue or abs(other_value) > skipValue) and (abs(this_value) < abs(other_value)*(1+t_from) or abs(other_value)*(1+t_to) < abs(this_value))
+            def changed_sign(this_value, other_value, skipValue):
+                return (abs(this_value) > skipValue or abs(this_value) > skipValue) and (this_value * other_value < 0)
+            def change(this_value, other_value):
+                if other_value == 0 : other_value = 0.001
+                change = (abs(this_value)-abs(other_value)) / abs(other_value)*100
+                change = round(change,1)
+                if change > 1000: return 'over +1000%'
+                if change < -1000: return 'over -1000%'
+                if change > 0 : change = '+' + str(change) + '%'
+                else: change = str(change) + '%'
+                return change
+            #-cheking how much abs values changed - doing this for all load cases
+            if changed_to_much(this_FX, other_FX, skip_l):
+                report += '- %s - FX change value from %.2f to %.2f (%s) \n'%(lc, other_FX, this_FX, change(this_FX, other_FX))
+                change_list.append(case)
+            if changed_to_much(this_FY, other_FY, skip_l):
+                report += '- %s - FY change value from %.2f to %.2f (%s) \n'%(lc, other_FY, this_FY, change(this_FY, other_FY))
+                change_list.append(case)
+            if changed_to_much(this_FZ, other_FZ, skip_v):
+                report += '- %s - FZ change value from %.2f to %.2f (%s) \n'%(lc, other_FZ, this_FZ, change(this_FZ, other_FZ))
+                change_list.append(case)
+            #-checking force sign changed in to opposite - doing this only for Graviity and Snow load cases
+            if ('Gravity' in lc or 'Snow' in lc) and myapp.ui.checkBox_compare_sign_check.isChecked():
+                if changed_sign(this_FX, other_FX, skip_l):
+                    report += '- %s - FX change sign from %.2f to %.2f \n'%(lc, other_FX, this_FX)
+                    change_list.append(case)
+                if changed_sign(this_FY, other_FY, skip_l):
+                    report += '- %s - FY change sign from %.2f to %.2f \n'%(lc, other_FY, this_FY)
+                    change_list.append(case)
+                if changed_sign(this_FZ, other_FZ, skip_v):
+                    report += '- %s - FZ change sign from %.2f to %.2f \n'%(lc, other_FZ, this_FZ)
+                    change_list.append(case)
+        if not case in change_list:
+            report += '- none found\n'
+    report += '=================================================================' + '\n'
+    if change_list:
+        change_list = list(dict.fromkeys(change_list)) # delete duplicates
+        report += 'Summary list of changed(%s/%s): %s \n'%(len(change_list), len(to_compare_list), change_list)
+    else:
+        report += 'Summary list of changed(%s/%s): %s (all changes in acceptable range) \n'%(len(change_list), len(to_compare_list), change_list)
+    myapp.ui.textBrowser_output.setText(report)
+
 def plot3D():
     comb = myapp.ui.comboBox_plt_comb.currentText()
     #-----
@@ -708,6 +819,13 @@ if __name__ == '__main__':
     myapp.ui.comboBox_staadPsasWE.addItems(['x', 'y'])
     set_template()
     myapp.ui.comboBox_staadTemplate.setDisabled(True) #for now as only one template available
+    #-----------------------------------------------------
+    myapp.ui.comboBox_tolerance_from.addItems(['-10', '-20', '-30', '-50', '-100'])
+    myapp.ui.comboBox_tolerance_from.setCurrentText('-100')
+    myapp.ui.comboBox_tolerance_to.addItems(['+0', '+5', '+10', '+20', '+30', '+50', '+75', '+100'])
+    myapp.ui.comboBox_tolerance_to.setCurrentText('+10')
+    myapp.ui.lineEdit_skip_value_vertical.setText('200')
+    myapp.ui.lineEdit_skip_value_lateral.setText('100')
     #-----------------------------------------------------
     ui_update_1()
     myapp.ui.comboBox_method.setCurrentIndex(0)

@@ -7,6 +7,9 @@ Sinope - J-ConMP stress pipe reaction analysis app
 
 Changelog
 ---------
+Sinope 0.3.1
+  - PSAS point compare feature added
+
 Sinope 0.2.3
   - staad command input feature checked and updated
   - save point feature added
