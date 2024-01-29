@@ -33,7 +33,7 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
-from mainwindow_ui1 import Ui_MainWindow
+from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
 
 import staadTemplate_PYT
@@ -114,18 +114,17 @@ def ui_update_1():
         myapp.ui.comboBox_method_value.addItems(['env-'])
         myapp.ui.comboBox_method_value.addItems(['env+/-'])
         myapp.ui.comboBox_method_value.addItems(['max_abs'])
-        myapp.ui.comboBox_method_value.addItems(['direct_summ'])
+        myapp.ui.comboBox_method_value.addItems(['direct_sum'])
         myapp.ui.comboBox_method_value.setCurrentIndex(3)
     #---
     set_template()
 
 def ui_2update():
     if myapp.ui.comboBox_method_value.isEnabled():
-        if myapp.ui.comboBox_method_value.currentText() in ['max_abs', 'direct_summ']:
+        if myapp.ui.comboBox_method_value.currentText() in ['max_abs', 'direct_sum']:
             myapp.ui.pushButton_save_point.setEnabled(True)
         else:
             myapp.ui.pushButton_save_point.setDisabled(True)
-
     else:
         myapp.ui.pushButton_save_point.setDisabled(True)
 
@@ -337,7 +336,7 @@ def sort_pointlist():
 def check_pointlist():
     report = ''
     if is_pointlist_empty():
-        report += '!!! Search list is empty -add some items !!!'
+        report += '!!! Search list is empty - add some items !!!'
         myapp.ui.textBrowser_output.setText(report)
         return None
 
@@ -385,14 +384,14 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
         report += point.Bese_reactions.round(2).to_string(index=False) + '\n\n'
     return report
 
-def merged_summ_reaction_report(filterlist=['AG01', 'AG05']):
+def merged_sum_reaction_report(filterlist=['AG01', 'AG05']):
     env_option = myapp.ui.comboBox_method_value.currentText()
     if env_option == 'env-': support_respoint.switch_merge_method_to_min()
     if env_option == 'env+': support_respoint.switch_merge_method_to_max()
     if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
-    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    if env_option == 'direct_sum': support_respoint.switch_merge_method_to_direct()
     #---
-    report = 'Method: summ in to one, %s \n\n'%env_option
+    report = 'Method: sum in to one, %s \n\n'%env_option
     #---
     if myapp.ui.comboBox_method_value.currentText() == 'env+/-':
         #min option
@@ -418,7 +417,7 @@ def merged_replacement_reaction_report(filterlist=['AG01', 'AG05']):
     if env_option == 'env-': support_respoint.switch_merge_method_to_min()
     if env_option == 'env+': support_respoint.switch_merge_method_to_max()
     if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
-    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    if env_option == 'direct_sum': support_respoint.switch_merge_method_to_direct()
     #---
     report = 'Method: one replacement, %s \n\n'%env_option
     #---
@@ -507,11 +506,11 @@ def save_point():
     if env_option == 'env-': support_respoint.switch_merge_method_to_min()
     if env_option == 'env+': support_respoint.switch_merge_method_to_max()
     if env_option == 'max_abs': support_respoint.switch_merge_method_to_abs()
-    if env_option == 'direct_summ': support_respoint.switch_merge_method_to_direct()
+    if env_option == 'direct_sum': support_respoint.switch_merge_method_to_direct()
     #-
     mlist = get_pointlist(splited = True)
     #-
-    if myapp.ui.comboBox_method.currentText() == 'summ in to one':
+    if myapp.ui.comboBox_method.currentText() == 'sum in to one':
         outpoint  = support_respoint()
         for i in mlist:
             outpoint += support_dict[i]
@@ -548,10 +547,10 @@ def show_report():
         report += 'PSAS format one by one for selected list of supports\n\n'
         report += base_reaction_report(mlist)
     # checking what type of summary selected
-    if myapp.ui.comboBox_method.currentText() == 'summ in to one':
+    if myapp.ui.comboBox_method.currentText() == 'sum in to one':
         report += '----------------------------------------------\n\n'
         report += "Merged result for selcted\n"
-        report += merged_summ_reaction_report(mlist) + '\n'
+        report += merged_sum_reaction_report(mlist) + '\n'
     if myapp.ui.comboBox_method.currentText() == 'one replacement':
         report += '----------------------------------------------\n\n'
         report += 'Merged result for selcted\n'
@@ -617,12 +616,21 @@ def show_compare():
         skip_l = skip_l/1000
         skip_v = skip_v/1000
     if unit_force not in ['[lbs]', '[kips]']:
-        myapp.ui.textBrowser_output.setText('Not regognized PSAS force unit %s'%unit_force)
+        myapp.ui.textBrowser_output.setText('Not recognized PSAS force unit %s'%unit_force)
         return
     #------
     text = myapp.ui.plainTextEdit_serch.toPlainText()
     to_compare_list = list(text.split("\n"))
-    report = 'Compare PSAS points by using parameters %s %s %s %s \n'%(t_from, t_to, skip_l, skip_v)
+    report = 'Compare PSAS points by using parameters:\n'
+    report += '- allowable value decrease %s [%%]\n'%(t_from*100)
+    report += '- allowable value increase %s [%%]\n'%(t_to*100)
+    report += '- lateral force skip value %s %s \n'%(skip_l, unit_force)
+    report += '- vertical force skip value %s %s \n'%(skip_v, unit_force)
+    if myapp.ui.checkBox_compare_support_type_check.isChecked():
+        report += '- support type name change check\n'
+    if myapp.ui.checkBox_compare_sign_check.isChecked():
+        report += '- force sign check for Gravity and Snow\n'
+    report += '\n'
     report += 'List to be checked (new PSAS / previous PSAS): \n %s \n'%to_compare_list
     change_list = [] # the list of compare case that shows significant differences
     for case in to_compare_list:
@@ -635,7 +643,7 @@ def show_compare():
             this = support_dict[this]
             other = support_dict[other]
         except:
-            report +='!!! ' + case + ' - can not get two psas point to make compare, check this record on point list !!! \n'
+            report +='!!! ' + case + ' - can not get two PSAS point to make compare, check this record on point list !!! \n'
             continue
         #-starting report
         report += case + '(%s versus %s)'%(this, other) + '\n'
@@ -645,7 +653,7 @@ def show_compare():
             report += 'PSAS force report for both points:\n'
             report += base_reaction_report([this.Point, other.Point])
         #-checking the support type changed
-        report += 'List of noticed significant change:\n'
+        report += 'List of noticed significant changes:\n'
         if this.Type != other.Type and myapp.ui.checkBox_compare_support_type_check.isChecked():
             report += '- Support type changed from %s into %s \n'%(other.Type, this.Type)
             change_list.append(case)
@@ -811,7 +819,7 @@ if __name__ == '__main__':
     myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     #----------------------------------------------------
     myapp.ui.comboBox_method.addItems(['keep separeted'])
-    myapp.ui.comboBox_method.addItems(['summ in to one'])
+    myapp.ui.comboBox_method.addItems(['sum in to one'])
     myapp.ui.comboBox_method.addItems(['one replacement'])
     #----------------------------------------------------
     myapp.ui.comboBox_staadTemplate.addItems(available_staad_templates)
@@ -830,12 +838,6 @@ if __name__ == '__main__':
     ui_update_1()
     myapp.ui.comboBox_method.setCurrentIndex(0)
     myapp.show()
-    #loaddata()
-    # s1 = support_dict[list(support_dict.keys())[0]]
-    # s2 = support_dict[list(support_dict.keys())[4]]
-    # s3 = support_dict[list(support_dict.keys())[12]]
-    # s4 = support_dict[list(support_dict.keys())[13]]
-    # s1+s2+s3+s4
     sys.exit(app.exec_())
 
 

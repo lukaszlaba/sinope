@@ -34,7 +34,7 @@ Sinope 0.0.1
 Description
 -----------
 
-Sinope is a J-ConMP dedicated tool that help analyze mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalen pipe reactions.
+Sinope is a J-ConMP dedicated tool that help analyze mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalent pipe reactions.
 
 How to run it
 -------------

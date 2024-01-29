@@ -1,17 +1,16 @@
 TODO:
 - test for different combinations for lines
 - remove or finish moments
-- load more than one xlsx at one time
-- checking if xlsx file is in expected format
-- clean up code
-- fix report
 - import point tags from dxf
-- save point option
+- compare - check point have the same load combinations
+
 
 In progress:
 
 
 Done:
+- compare feature
+- save point option
 - staad input generator
 - dxf export point only option
 - clean up reports
