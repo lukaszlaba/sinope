@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1460</width>
-    <height>864</height>
+    <height>766</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,16 @@
        <widget class="QCheckBox" name="checkBox_line_name">
         <property name="text">
          <string>load line name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_purge">
+        <property name="text">
+         <string>purge</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -55,7 +65,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>175</width>
           <height>16777215</height>
          </size>
         </property>
@@ -180,7 +190,7 @@ AG5</string>
             <item>
              <widget class="QPushButton" name="pushButton_Report">
               <property name="text">
-               <string>GENERATE PSSAS REPORT</string>
+               <string>GENERATE PSAS REPORT</string>
               </property>
              </widget>
             </item>
@@ -507,7 +517,7 @@ AG5</string>
         <item>
          <widget class="QLabel" name="label_16">
           <property name="text">
-           <string>and verticical [lbs]:</string>
+           <string>and vertical [lbs]:</string>
           </property>
          </widget>
         </item>
@@ -566,6 +576,52 @@ AG5</string>
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QCheckBox" name="checkBox_compare_coord_check">
+          <property name="text">
+           <string>Coordinate check with tolerance [inches]:</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_coord_delta">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -609,7 +665,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <x>0</x>
      <y>0</y>
      <width>1460</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

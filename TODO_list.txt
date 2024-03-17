@@ -1,7 +1,7 @@
 TODO:
 - test for different combinations for lines
 - remove or finish moments
-- import point tags from dxf
+- import point from dxf
 - compare - check point have the same load combinations
 
 
@@ -9,6 +9,9 @@ In progress:
 
 
 Done:
+- coordinate check for compare
+- purge points like CENTRALIZER etc.
+- add Tag paremeter into report
 - compare feature
 - save point option
 - staad input generator

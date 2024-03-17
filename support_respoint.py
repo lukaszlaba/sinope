@@ -272,7 +272,7 @@ class support_respoint():
 
     @property
     def CoordinateXYZ(self):
-        return (self.df['X'].iloc[0],  self.df['Y'].iloc[0], self.df['Z'].iloc[0])
+        return (round(self.df['X'].iloc[0],2),  round(self.df['Y'].iloc[0],2), round(self.df['Z'].iloc[0],2))
 
     @property
     def Bese_reactions(self):
@@ -371,7 +371,7 @@ class support_respoint():
             return False
 
     def __str__(self):
-        return self.Point + ', Type ' + self.Type
+        return self.Point + ' Type ' + self.Type
 
 #test if main
 if __name__ == '__main__': 

@@ -1,4 +1,4 @@
-Sinope - J-ConMP stress pipe reaction analysis app
+Sinope - J-MC stress pipe reaction analysis app
 ---------------------------------------------------
 
 `Download binaries for Windows <https://github.com/lukaszlaba/sinope/releases>`_
@@ -7,6 +7,10 @@ Sinope - J-ConMP stress pipe reaction analysis app
 
 Changelog
 ---------
+Sinope 0.3.2
+  - PSAS point compare feature updated
+  - purge option added
+
 Sinope 0.3.1
   - PSAS point compare feature added
 
@@ -34,7 +38,7 @@ Sinope 0.0.1
 Description
 -----------
 
-Sinope is a J-ConMP dedicated tool that help analyze mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalent pipe reactions.
+Sinope is a J-MC dedicated tool that help analyze mech pipe stress reactions and transfer them to Staad model. Sinope make easy to find simplified equivalent pipe reactions.
 
 How to run it
 -------------
@@ -49,7 +53,7 @@ You can also run it by using Python engine. After the Python and needed librarie
 License
 -------
 
-Copyright (C) 2023 Łukasz Laba <lukaszlaba@gmail.com>
+Copyright (C) 2023-2024 Łukasz Laba <lukaszlaba@gmail.com>
 
 Sinope is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

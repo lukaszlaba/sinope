@@ -1,6 +1,6 @@
 '''
 --------------------------------------------------------------------------
-Copyright (C) 2023 Lukasz Laba <lukaszlaba@gmail.com>
+Copyright (C) 2023-2024 Lukasz Laba <lukaszlaba@gmail.com>
 
 This file is part of Sinope.
 
@@ -58,7 +58,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.3.1'
+version = 'sinope 0.3.2'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -200,6 +200,13 @@ def loaddata():
             myapp.ui.textBrowser_output.setText(load_report)
         #---
         support_dict[point] = support_respoint(df1)
+    #---purging - removing fake PSAS points
+    if myapp.ui.checkBox_purge.isChecked():
+        for key in list(support_dict):
+            s = support_dict[key]
+            if 'CENTRALIZER' in s.Tag or 'REF' in s.Tag:
+                load_report += s.Point + ' ' + s.Tag + ' purged \n'
+                support_dict.pop(key)
     #---pushing supports type list to combobox
     type_list = []
     for key in support_dict.keys():
@@ -260,11 +267,11 @@ def loaddata():
         load_report +=  unit_coord + 'coordinate unit found \n'
         myapp.ui.textBrowser_output.setText(load_report)
     except:
-        unit_coord = '[in]'
+        unit_coord = '[inches]'
         load_report +=  'coordinate unit not found, default ' + unit_force + ' used (!!!!) \n'
         myapp.ui.textBrowser_output.setText(load_report)
     #--display load report
-    load_report += '%s support point data added from %s'%(len(list_of_points), filename)
+    load_report += '%s support point data added from %s'%(len(support_dict.keys()), filename)
     myapp.ui.textBrowser_output.setText(load_report)
     set_title()
 
@@ -278,7 +285,6 @@ def clear_data():
     myapp.ui.textBrowser_output.setText('')
     set_title()
 
-#OK
 def find_by_types():
     selected_type = myapp.ui.comboBox_Type.currentText()
     selected_line = myapp.ui.comboBox_Line.currentText()
@@ -290,7 +296,6 @@ def find_by_types():
     set_pointlist(searchlist)
     sort_pointlist()
 
-#OK
 def get_pointlist(splited = False):
     text = myapp.ui.plainTextEdit_serch.toPlainText()
     text = text.replace('/', '\n')
@@ -303,7 +308,6 @@ def get_pointlist(splited = False):
         memberlist  = [i.split('@')[0] for i in memberlist]
     return memberlist
 
-#OK
 def get_staadpointlist():
     memberlist = get_pointlist(splited = False)
     while '' in memberlist:
@@ -312,11 +316,9 @@ def get_staadpointlist():
     memberlist  = [i.split('@')[1] if '@' in i else '' for i in memberlist]
     return memberlist
 
-#OK
 def clear_list():
     myapp.ui.plainTextEdit_serch.clear()
 
-#OK
 def set_pointlist(mlist):
     curent_list = get_pointlist()
     mlist = curent_list + mlist
@@ -326,13 +328,12 @@ def set_pointlist(mlist):
     myapp.ui.plainTextEdit_serch.clear()
     myapp.ui.plainTextEdit_serch.insertPlainText(out_text)
 
-#OK
 def sort_pointlist():
     mlist = get_pointlist()
     mlist.sort()
     myapp.ui.plainTextEdit_serch.clear()
     set_pointlist(mlist)
-#OK
+
 def check_pointlist():
     report = ''
     if is_pointlist_empty():
@@ -355,20 +356,18 @@ def check_pointlist():
             report += str(i) + ' - !!!!!!NO DATA FOUND!!!!!!!<<<<<<<<<<<<<<<<<<<<<<\n'
     myapp.ui.textBrowser_output.setText(report)
 
-#OK
 def is_pointlist_empty():
     if get_pointlist():
         return False
     else:
         return True
-#OK
+
 def data_for_pointlist_exist():
     if list(set(get_pointlist(splited = True))-set(support_dict.keys())):
         return False
     else:
         return True
 
-#OK
 def load_memberlist_from_results():
     mlist = list(support_dict.keys())
     mlist = list(dict.fromkeys(mlist))
@@ -380,7 +379,7 @@ def base_reaction_report(filterlist=['AG01', 'AG05']):
     report = ''
     for i in filterlist:
         point = support_dict[i]
-        report += str(point) + '\n'
+        report += str(point) + ' (' +point.Tag + ')\n'
         report += point.Bese_reactions.round(2).to_string(index=False) + '\n\n'
     return report
 
@@ -610,6 +609,8 @@ def show_compare():
     skip_l = float(skip_l)
     skip_v = myapp.ui.lineEdit_skip_value_vertical.text()
     skip_v = float(skip_v)
+    t_coord = myapp.ui.lineEdit_coord_delta.text()
+    t_coord = float(t_coord)
     #-check the skip level unit match PSAS unit
     if unit_force == '[lbs]': pass
     if unit_force == '[kips]':
@@ -617,6 +618,13 @@ def show_compare():
         skip_v = skip_v/1000
     if unit_force not in ['[lbs]', '[kips]']:
         myapp.ui.textBrowser_output.setText('Not recognized PSAS force unit %s'%unit_force)
+        return
+    #-check the coord tolerance unit match PSAS unit
+    if unit_coord == '[inches]': pass
+    if unit_coord == '[feets]':
+        t_coord = t_coord/12
+    if unit_coord not in ['[inches]', '[feets]']:
+        myapp.ui.textBrowser_output.setText('Not recognized PSAS coord unit %s'%unit_coord)
         return
     #------
     text = myapp.ui.plainTextEdit_serch.toPlainText()
@@ -630,6 +638,12 @@ def show_compare():
         report += '- support type name change check\n'
     if myapp.ui.checkBox_compare_sign_check.isChecked():
         report += '- force sign check for Gravity and Snow\n'
+    if myapp.ui.checkBox_compare_coord_check.isChecked():
+        report += '- coordinate change check (more than %s %s) \n'%(t_coord, unit_coord)
+    report += '\n'
+    report += 'FX FY FZ are PASS format reaction forces\n'
+    report += 'Force unit - %s \n'%(unit_force)
+    report += 'Coordinate unit - %s \n '%(unit_coord)
     report += '\n'
     report += 'List to be checked (new PSAS / previous PSAS): \n %s \n'%to_compare_list
     change_list = [] # the list of compare case that shows significant differences
@@ -643,7 +657,7 @@ def show_compare():
             this = support_dict[this]
             other = support_dict[other]
         except:
-            report +='!!! ' + case + ' - can not get two PSAS point to make compare, check this record on point list !!! \n'
+            report +='!!! ' + case + ' - cannot get two PSAS point to make compare, check this record on point list !!! \n'
             continue
         #-starting report
         report += case + '(%s versus %s)'%(this, other) + '\n'
@@ -652,10 +666,15 @@ def show_compare():
             report += '\n'
             report += 'PSAS force report for both points:\n'
             report += base_reaction_report([this.Point, other.Point])
-        #-checking the support type changed
         report += 'List of noticed significant changes:\n'
+        #-checking the support type changed
         if this.Type != other.Type and myapp.ui.checkBox_compare_support_type_check.isChecked():
             report += '- Support type changed from %s into %s \n'%(other.Type, this.Type)
+            change_list.append(case)
+        #-checking coordinate changed
+        dist = lambda x,y: ((x[0]-y[0])**2 + (x[1]-y[1])**2 + (x[2]-y[2])**2)**0.5
+        if dist(this.CoordinateXYZ, other.CoordinateXYZ)>t_coord and myapp.ui.checkBox_compare_coord_check.isChecked():
+            report += '- Support coordinate chenged from %s into %s \n'%(other.CoordinateXYZ, this.CoordinateXYZ)
             change_list.append(case)
         #-cheking forces for PSAS load cases
         for lc in this.CombList:
@@ -793,7 +812,7 @@ def set_title(info=''):
 
 def info():
     about = '''
-Sinope - J-ConMP stress pipe reaction analysis app
+Sinope - J-MC stress pipe reaction analysis app
 Beta stage software.
 
 -------------Licence-------------
@@ -803,7 +822,7 @@ Sinope is distributed in the hope that it will be useful, but WITHOUT ANY WARRAN
 
 You should have received a copy of the GNU General Public License along with Sinope; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA.
 
-Copyright (C) 2023 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
+Copyright (C) 2023-2024 Lukasz Laba (e-mail : lukaszlaba@gmail.com)
 Project website: https://github.com/lukaszlaba/sinope
 Check for lataest version: https://github.com/lukaszlaba/sinope/releases
 '''
@@ -814,7 +833,7 @@ if __name__ == '__main__':
     myapp = MAINWINDOW()
     print_dialog = QPrintDialog()
     set_title()
-    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-ConMP stress pipe reaction analysis app. Load data and fill input list to get report.')
+    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-MC stress pipe reaction analysis app. Load data and fill input list to get report.')
     myapp.ui.plainTextEdit_serch.clear()
     myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     #----------------------------------------------------
@@ -834,6 +853,7 @@ if __name__ == '__main__':
     myapp.ui.comboBox_tolerance_to.setCurrentText('+10')
     myapp.ui.lineEdit_skip_value_vertical.setText('200')
     myapp.ui.lineEdit_skip_value_lateral.setText('100')
+    myapp.ui.lineEdit_coord_delta.setText('6')
     #-----------------------------------------------------
     ui_update_1()
     myapp.ui.comboBox_method.setCurrentIndex(0)
@@ -842,6 +862,7 @@ if __name__ == '__main__':
 
 
 #command used to frozening with pyinstaller
+#cd C:\Users\Lenovo\python_wip\myenv\env_sinope\Scripts
 #pyinstaller --onefile --noconsole --icon=app.ico C:\Users\Lenovo\Dropbox\PYAPPS_STRUCT\SOURCE_SINOPE\source\sinope.py
 
 #cd C:\Users\Lenovo\python_wip\myenv\env_sinope\Scripts
