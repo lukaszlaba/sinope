@@ -7,6 +7,9 @@ Sinope - J-MC stress pipe reaction analysis app
 
 Changelog
 ---------
+Sinope 0.3.3
+  - [N] force unit added
+
 Sinope 0.3.2
   - PSAS point compare feature updated
   - purge option added

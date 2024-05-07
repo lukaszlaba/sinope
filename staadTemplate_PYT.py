@@ -18,7 +18,7 @@ load_case_list = [  'PSAS GRAVITY',#
                 ]
 
 ucs_transform_possible = ['X(x)/Y(z)/Z(-y)', 'X(y)/Y(z)/Z(x)']
-units = {'[kip]':1, '[lbs]':0.001, '[kN]': 0.225}
+units = {'[kip]':1, '[lbs]':0.001, '[kN]': 0.22480894, '[N]': 0.00022480894}
 
 def force_transform(psas_force = np.array([1, 1, 0]), ucsTransform = 'X(x)/Y(z)/Z(-y)'):
     if ucsTransform == 'X(x)/Y(z)/Z(-y)': tm = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])

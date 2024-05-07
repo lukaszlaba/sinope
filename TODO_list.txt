@@ -9,6 +9,7 @@ In progress:
 
 
 Done:
+- [N] force unit added
 - coordinate check for compare
 - purge points like CENTRALIZER etc.
 - add Tag paremeter into report

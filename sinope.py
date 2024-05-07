@@ -58,7 +58,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.3.2'
+version = 'sinope 0.3.3'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -842,7 +842,7 @@ if __name__ == '__main__':
     myapp.ui.comboBox_method.addItems(['one replacement'])
     #----------------------------------------------------
     myapp.ui.comboBox_staadTemplate.addItems(available_staad_templates)
-    myapp.ui.comboBox_staadUnit.addItems(['kip', 'lbs', 'kN'])
+    myapp.ui.comboBox_staadUnit.addItems(['kip', 'lbs', 'kN', 'N'])
     myapp.ui.comboBox_staadPsasWE.addItems(['x', 'y'])
     set_template()
     myapp.ui.comboBox_staadTemplate.setDisabled(True) #for now as only one template available
