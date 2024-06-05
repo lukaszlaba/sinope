@@ -33,13 +33,16 @@ from PyQt5.QtWidgets import QMessageBox
 import matplotlib.pyplot as plt
 from dxfwrite import DXFEngine as dxf
 
+import pandas
+
+import ezdxf
+
 from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
 
 import staadTemplate_PYT
 import staadTemplate_JDC
 
-import pandas
 
 support_dict = {}
 
@@ -49,6 +52,8 @@ unit_coord = '[]'
 
 opendir = os.path.dirname(__file__)#dir path for save and open
 filename = None
+
+dxfopendir = os.path.dirname(__file__)#dir path for save and open
 
 support_dict = {}
 
@@ -798,6 +803,19 @@ def save_as_dxf():
 def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
         myapp.ui.textBrowser_output.document().print_(print_dialog.printer())
+
+# def get_staad_psas_points_from_dxf():
+#     #---
+#     filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".dxf' (*.dxf)")[0]
+#     #filepath = 'C:/testdata.xlsx'
+#     #filepath = '/home/lul/Downloads/test.xlsx'
+#     filepath = str(filepath)
+#     if not filepath == '':
+#         opendir = os.path.dirname(filepath)
+#         filename = os.path.basename(filepath)
+#     #'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
+#     #---
+
 
 def set_title(info=''):
     if not info:
