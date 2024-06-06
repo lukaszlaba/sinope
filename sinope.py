@@ -63,7 +63,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.3.3'
+version = 'sinope 0.4.1'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -95,6 +95,8 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.comboBox_staadTemplate.currentIndexChanged.connect(ui_update_1)
         self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
         self.ui.pushButton_Compare.clicked.connect(show_compare)
+        #--
+        self.ui.pushButton_get_from_dxf.clicked.connect(get_staad_psas_points_from_dxf)
 
 def ui_update_1():
     if myapp.ui.comboBox_method.currentIndex() == 0:
@@ -804,17 +806,43 @@ def print_report():
     if print_dialog.exec_() == QtWidgets.QDialog.Accepted:
         myapp.ui.textBrowser_output.document().print_(print_dialog.printer())
 
-# def get_staad_psas_points_from_dxf():
-#     #---
-#     filepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open excel file', directory = opendir, filter = ".dxf' (*.dxf)")[0]
-#     #filepath = 'C:/testdata.xlsx'
-#     #filepath = '/home/lul/Downloads/test.xlsx'
-#     filepath = str(filepath)
-#     if not filepath == '':
-#         opendir = os.path.dirname(filepath)
-#         filename = os.path.basename(filepath)
-#     #'C:\FAB-SSS-10_LoadReportForStructural.xlsx'
-#     #---
+def get_staad_psas_points_from_dxf():
+    myapp.ui.textBrowser_output.setText('Processing...')
+    global dxfopendir
+    #---geting dxf file path
+    dxffilepath = QtWidgets.QFileDialog.getOpenFileName(caption = 'Open dxf file', directory = dxfopendir, filter = ".dxf' (*.dxf)")[0]
+    #dxffilepath = 'C:/Users/Lenovo/Dropbox/PYAPPS_STRUCT/SOURCE_SINOPE/psas_staad.dxf'
+    dxffilepath = str(dxffilepath)
+    #---
+    if not dxffilepath == '':
+        dxfopendir = os.path.dirname(dxffilepath)
+    #---
+    dwg = ezdxf.readfile(dxffilepath)
+    #--deleting circles
+    to_delete = []
+    for e in dwg.modelspace():
+            if e.dxftype() == 'CIRCLE':
+                #print(e)
+                to_delete.append(e)
+    for e in to_delete:
+        dwg.modelspace().delete_entity(e)
+    #--geting psas points and staad numbers
+    out_text = ''
+    for e in dwg.modelspace():
+        for j in dwg.modelspace():
+            if e.dxftype() == 'TEXT' and j.dxftype() == 'TEXT':
+                if abs(abs(e.dxf.insert[0])+abs(e.dxf.insert[1])+abs(e.dxf.insert[2]) - (abs(j.dxf.insert[0])+abs(j.dxf.insert[1])+abs(j.dxf.insert[2]))) < 0.001:
+                    if str(e.dxf.text) != str(j.dxf.text):
+                        if not e.dxf.text.isnumeric():
+                            out_text += e.dxf.text + ' @ ' + j.dxf.text + '\n'
+                            #draw mark circle
+                            dwg.modelspace().add_circle(e.dxf.insert, radius=0.5)
+    #--saving circles
+    dwg.save()
+    #--pushing points to UI
+    myapp.ui.plainTextEdit_serch.clear()
+    myapp.ui.plainTextEdit_serch.insertPlainText(out_text)
+    myapp.ui.textBrowser_output.setText('Done')
 
 
 def set_title(info=''):

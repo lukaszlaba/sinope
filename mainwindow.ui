@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1460</width>
+    <width>1651</width>
     <height>766</height>
    </rect>
   </property>
@@ -130,9 +130,9 @@ AG5</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_getMembers_2">
+       <widget class="QPushButton" name="pushButton_get_from_dxf">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>get from dxf</string>
@@ -664,8 +664,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1460</width>
-     <height>22</height>
+     <width>1651</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>
