@@ -63,7 +63,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.4.1'
+version = 'sinope 0.4.2'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -834,7 +834,7 @@ def get_staad_psas_points_from_dxf():
                 if abs(abs(e.dxf.insert[0])+abs(e.dxf.insert[1])+abs(e.dxf.insert[2]) - (abs(j.dxf.insert[0])+abs(j.dxf.insert[1])+abs(j.dxf.insert[2]))) < 0.001:
                     if str(e.dxf.text) != str(j.dxf.text):
                         if not e.dxf.text.isnumeric():
-                            out_text += e.dxf.text + ' @ ' + j.dxf.text + '\n'
+                            out_text += e.dxf.text + '@' + j.dxf.text + '\n'
                             #draw mark circle
                             dwg.modelspace().add_circle(e.dxf.insert, radius=0.5)
     #--saving circles

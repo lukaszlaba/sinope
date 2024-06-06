@@ -7,7 +7,7 @@ Sinope - J-MC stress pipe reaction analysis app
 
 Changelog
 ---------
-Sinope 0.4.1
+Sinope 0.4.2
   - dxf psas/staad point list feature added
 
 Sinope 0.3.3
