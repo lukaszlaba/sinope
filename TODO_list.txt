@@ -1,7 +1,6 @@
 TODO:
 - test for different combinations for lines
 - remove or finish moments
-- import point from dxf
 - compare - check point have the same load combinations
 
 
@@ -9,6 +8,7 @@ In progress:
 
 
 Done:
+- import point from dxf
 - [N] force unit added
 - coordinate check for compare
 - purge points like CENTRALIZER etc.

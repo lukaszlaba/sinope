@@ -63,7 +63,7 @@ load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.4.2'
+version = 'sinope 0.4.3'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -828,21 +828,47 @@ def get_staad_psas_points_from_dxf():
         dwg.modelspace().delete_entity(e)
     #--geting psas points and staad numbers
     out_text = ''
+    warnings_text = 'PSAS-node dxf import report: \n'
+    psas_tags = set()
+    node_tags = set()
     for e in dwg.modelspace():
+        found_node_at_psas_label_flag = False
         for j in dwg.modelspace():
             if e.dxftype() == 'TEXT' and j.dxftype() == 'TEXT':
-                if abs(abs(e.dxf.insert[0])+abs(e.dxf.insert[1])+abs(e.dxf.insert[2]) - (abs(j.dxf.insert[0])+abs(j.dxf.insert[1])+abs(j.dxf.insert[2]))) < 0.001:
-                    if str(e.dxf.text) != str(j.dxf.text):
-                        if not e.dxf.text.isnumeric():
-                            out_text += e.dxf.text + '@' + j.dxf.text + '\n'
-                            #draw mark circle
-                            dwg.modelspace().add_circle(e.dxf.insert, radius=0.5)
+                if abs(abs(e.dxf.insert[0])+abs(e.dxf.insert[1])+abs(e.dxf.insert[2]) - (abs(j.dxf.insert[0])+abs(j.dxf.insert[1])+abs(j.dxf.insert[2]))) < 0.1:
+                    if abs((e.dxf.insert[0]**2+e.dxf.insert[1]**2+e.dxf.insert[2]**2)**0.5 - (j.dxf.insert[0]**2+j.dxf.insert[1]**2+j.dxf.insert[2]**2)**0.5 ) < 0.1:
+                        if str(e.dxf.text) != str(j.dxf.text):
+                            if not e.dxf.text.isnumeric():
+                                if j.dxf.text.isnumeric():
+                                    warning = False
+                                    if found_node_at_psas_label_flag:
+                                        warnings_text += e.dxf.text + '@' + j.dxf.text + '  !warning! - more than one staad node at one psas label \n'
+                                        warning = True
+                                    found_node_at_psas_label_flag = True
+                                    out_text += e.dxf.text + '@' + j.dxf.text + '\n'
+                                    #print (e.dxf.insert, j.dxf.insert)
+                                    #print (e.dxf.align_point, j.dxf.align_point)
+                                    if e.dxf.text in psas_tags:
+                                        warnings_text += e.dxf.text + '@' + j.dxf.text + '  !warning! psas label already used \n'
+                                        warning = True
+                                    if j.dxf.text in node_tags:
+                                        warnings_text += e.dxf.text + '@' + j.dxf.text +  '  !warning! staad node number already used \n'
+                                        warning = True
+                                    psas_tags.add(e.dxf.text)
+                                    node_tags.add(j.dxf.text)
+                                    #draw mark circle
+                                    if warning:
+                                        dwg.modelspace().add_circle(e.dxf.insert, radius=2*j.dxf.height, dxfattribs={"color": 1})
+                                    else:
+                                        dwg.modelspace().add_circle(e.dxf.insert, radius=1*j.dxf.height, dxfattribs={"color": 7})
     #--saving circles
     dwg.save()
     #--pushing points to UI
     myapp.ui.plainTextEdit_serch.clear()
     myapp.ui.plainTextEdit_serch.insertPlainText(out_text)
-    myapp.ui.textBrowser_output.setText('Done')
+    warnings_text += 'Done'
+    myapp.ui.textBrowser_output.setText(warnings_text)
+
 
 
 def set_title(info=''):
