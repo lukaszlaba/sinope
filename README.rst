@@ -11,7 +11,6 @@ Sinope 0.4.4
   - FPT staad template added
   - moment occurrence alert added
 
----------
 Sinope 0.4.3
   - dxf psas/staad point list feature fixed/updated
 
