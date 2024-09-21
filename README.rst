@@ -7,6 +7,11 @@ Sinope - J-MC stress pipe reaction analysis app
 
 Changelog
 ---------
+Sinope 0.4.4
+  - FPT staad template added
+  - moment occurrence alert added
+
+---------
 Sinope 0.4.3
   - dxf psas/staad point list feature fixed/updated
 
@@ -58,6 +63,11 @@ Link to windows binaries download is shown below.
 https://github.com/lukaszlaba/sinope/releases
 
 You can also run it by using Python engine. After the Python and needed libraries was installed, just run sinope.py file. Sinope is based on Python 3 and non-standard Python libraries pyqt5, matplotlib, pandas, dxfwrite.
+
+Notes
+-----
+
+.. image:: psas_staad_ucs.png
 
 License
 -------

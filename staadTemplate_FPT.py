@@ -4,39 +4,43 @@ This file is part of Sinope.
 import numpy as np
 
 description = '''
-Perry Y. Template - Kardynal & Bocian Project
+Full PSAS Transfer - Bocian Project
 
 Staad reference loads list:
 
-PSAS GRAVITY  -  FX FY FZ from PSAS Gravity, signs respected
-PSAS SEISMIC IN X DIR  -  FX FY FZ from PSAS E(E/W) or E(N/S), signs positive(+)
-PSAS SEISMIC IN Z DIR  -  FX FY FZ from PSAS E(E/W) or E(N/S), signs positive(+)
-PSAS SEISMIC IN Y DIR  -  FX FY FZ from PSAS maxabs(E(DOWN), E(UP)), signs positive(+)
-PSAS SEISMIC IN X-DIR SAM1  -  FX FY FZ from PSAS S.A.M. 1, signs positive(+)
-PSAS SEISMIC IN Z-DIR SAM2  -  FX FY FZ from PSAS S.A.M. 2, signs positive(+)
-PSAS SUSTAINED THERMAL PRESSURE IN X DIR  -  FX from PSAS
-                                             maxabs(Thermali, Pressurei, Thermali+Pressurei) for i=1,2,3, signs positive(+)
-PSAS SUSTAINED THERMAL PRESSURE IN Z DIR  -  FZ from PSAS
-                                             maxabs(Thermali, Pressurei, Thermali+Pressurei) for i=1,2,3, signs positive(+)
-PSAS SUSTAINED THERMAL PRESSURE IN Y DIR  -  FY from PSAS
-                                             maxabs(Thermali, Pressurei, Thermali+Pressurei) for i=1,2,3, signs positive(+)
-PSAS SNOW  -  FX FY FZ from PSAS Snow, signs respected
-PSAS WIND IN X DIR  -  FX FY FZ from PSAS W(E/W) or W(N/S), signs positive(+)
-PSAS WIND IN Z DIR  -  FX FY FZ from PSAS W(E/W) or W(N/S), signs positive(+)
+PSAS GRAVITY            -  FX FY FZ from PSAS Gravity, signs respected
+PSAS SEISMIC IN X DIR   -  FX FY FZ from PSAS E(E/W) or E(N/S), signs respected
+PSAS SEISMIC IN Z DIR   -  FX FY FZ from PSAS E(E/W) or E(N/S), signs respected
+PSAS SEISMIC IN Y DIR   -  FX FY FZ from PSAS E(DOWN), signs respected, Note - PSAS E(DOWN) and E(UP) are the same so E(DOWN)
+                           taken, signs respected
+PSAS SEISMIC IN X-DIR SAM1   -  FX FY FZ from PSAS S.A.M. 1, signs respected
+PSAS SEISMIC IN Z-DIR SAM2   -  FX FY FZ from PSAS S.A.M. 2, signs respected
+PSAS PRESSURE 1   -  FX FY FZ from PSAS Pressure 1, signs respected
+PSAS PRESSURE 2   -  FX FY FZ from PSAS Pressure 2, signs respected
+PSAS PRESSURE 3   -  FX FY FZ from PSAS Pressure 3, signs respected
+PSAS THERMAL 1   -  FX FY FZ from PSAS Thermal 1, signs respected
+PSAS THERMAL 2   -  FX FY FZ from PSAS Thermal 2, signs respected
+PSAS THERMAL 3   -  FX FY FZ from PSAS Thermal 3, signs respected
+PSAS SNOW   -  FX FY FZ from PSAS Snow, signs respected
+PSAS WIND IN X DIR   -  FX FY FZ from PSAS W(E/W) or W(N/S), signs respected
+PSAS WIND IN Z DIR   -  FX FY FZ from PSAS W(E/W) or W(N/S), signs respected
 '''
 
-load_case_list = [  'PSAS GRAVITY',#
-                    'PSAS SEISMIC IN X DIR',#
-                    'PSAS SEISMIC IN Z DIR',#
-                    'PSAS SEISMIC IN Y DIR',#
+load_case_list = [  'PSAS GRAVITY',
+                    'PSAS SEISMIC IN X DIR',
+                    'PSAS SEISMIC IN Z DIR',
+                    'PSAS SEISMIC IN Y DIR',
                     'PSAS SEISMIC IN X-DIR SAM1',
                     'PSAS SEISMIC IN Z-DIR SAM2',
-                    'PSAS SUSTAINED THERMAL PRESSURE IN X DIR',#
-                    'PSAS SUSTAINED THERMAL PRESSURE IN Z DIR',#
-                    'PSAS SUSTAINED THERMAL PRESSURE IN Y DIR',#
-                    'PSAS SNOW', #
-                    'PSAS WIND IN X DIR', #
-                    'PSAS WIND IN Z DIR' #
+                    'PSAS PRESSURE 1',
+                    'PSAS PRESSURE 2',
+                    'PSAS PRESSURE 3',
+                    'PSAS THERMAL 1',
+                    'PSAS THERMAL 2',
+                    'PSAS THERMAL 3',
+                    'PSAS SNOW',
+                    'PSAS WIND IN X DIR',
+                    'PSAS WIND IN Z DIR'
                 ]
 
 ucs_transform_possible = ['X(x)/Y(z)/Z(-y)', 'X(y)/Y(z)/Z(x)']
@@ -92,7 +96,7 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
+        #staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' using PSAS ' + seismic_dir + ' seismic'   + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
@@ -111,21 +115,16 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
+        #staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' using PSAS ' + seismic_dir + ' seismic'   + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
-    if LC == 'PSAS SEISMIC IN Y DIR': #check the method
-        psas_force_up = respoint.get_force_vector('E(UP)')
-        if not psas_force_up: return '*!!!!!!No Seismic E(UP) data in psas at point %s!!!!!!'%str(psas_point)
-        psas_force_down = respoint.get_force_vector('E(DOWN)')
-        if not psas_force_down: return '*!!!!!!No Seismic E(DOWN) data in psas at point %s!!!!!!'%str(psas_point)
-        psas_force_up = abs(np.array(psas_force_up))
-        psas_force_down = abs(np.array(psas_force_down))
-        psas_force = np.maximum(psas_force_up, psas_force_down)
+    if LC == 'PSAS SEISMIC IN Y DIR':
+        psas_force = respoint.get_force_vector('E(DOWN)')
+        if not psas_force: return '*!!!!!!No Seismic E(DOWN) data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
@@ -135,7 +134,7 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
+        #staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
@@ -145,59 +144,63 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
+        #staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
-    if LC in ['PSAS SUSTAINED THERMAL PRESSURE IN X DIR', 'PSAS SUSTAINED THERMAL PRESSURE IN Y DIR', 'PSAS SUSTAINED THERMAL PRESSURE IN Z DIR'] :
-        psas_Thermal1 = respoint.get_force_vector('Thermal1')
-        if not psas_Thermal1: return '*!!!!!!No Thermal1 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Thermal2 = respoint.get_force_vector('Thermal2')
-        if not psas_Thermal2: return '*!!!!!!No Thermal2 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Thermal3 = respoint.get_force_vector('Thermal3')
-        if not psas_Thermal3: return '*!!!!!!No Thermal3 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Pressure1 = respoint.get_force_vector('Pressure1')
-        if not psas_Pressure1: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Pressure2 = respoint.get_force_vector('Pressure2')
-        if not psas_Pressure2: return '*!!!!!!No Pressure2 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Pressure3 = respoint.get_force_vector('Pressure3')
-        if not psas_Pressure3: return '*!!!!!!No Pressure3 data in psas at point %s!!!!!!'%str(psas_point)
-        psas_Thermal1 = np.array(psas_Thermal1)
-        psas_Thermal2 = np.array(psas_Thermal2)
-        psas_Thermal3 = np.array(psas_Thermal3)
-        psas_Pressure1 = np.array(psas_Pressure1)
-        psas_Pressure2 = np.array(psas_Pressure2)
-        psas_Pressure3 = np.array(psas_Pressure3)
-        out1 =  [   max(abs(psas_Thermal1[0]), abs(psas_Pressure1[0]), abs(psas_Thermal1[0]+psas_Pressure1[0])),
-                    max(abs(psas_Thermal1[1]), abs(psas_Pressure1[1]), abs(psas_Thermal1[1]+psas_Pressure1[1])),
-                    max(abs(psas_Thermal1[2]), abs(psas_Pressure1[2]), abs(psas_Thermal1[2]+psas_Pressure1[2])),
-                ]
-        out2 =  [   max(abs(psas_Thermal2[0]), abs(psas_Pressure2[0]), abs(psas_Thermal2[0]+psas_Pressure2[0])),
-                    max(abs(psas_Thermal2[1]), abs(psas_Pressure2[1]), abs(psas_Thermal2[1]+psas_Pressure2[1])),
-                    max(abs(psas_Thermal2[2]), abs(psas_Pressure2[2]), abs(psas_Thermal2[2]+psas_Pressure2[2])),
-                ]
-        out3 =  [   max(abs(psas_Thermal3[0]), abs(psas_Pressure3[0]), abs(psas_Thermal3[0]+psas_Pressure3[0])),
-                    max(abs(psas_Thermal3[1]), abs(psas_Pressure3[1]), abs(psas_Thermal3[1]+psas_Pressure3[1])),
-                    max(abs(psas_Thermal3[2]), abs(psas_Pressure3[2]), abs(psas_Thermal3[2]+psas_Pressure3[2])),
-                ]
-        out1=np.array(out1)
-        out2=np.array(out2)
-        out3=np.array(out3)
-        psas_force = np.maximum(np.maximum(out1, out2), out3)
+    if LC == 'PSAS PRESSURE 1':
+        psas_force = respoint.get_force_vector('Pressure1')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
-        staad_force = abs(staad_force)
         staad_force = np.round(staad_force, decimals=3)
-        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN X DIR':
-            staad_force[1] = 0
-            staad_force[2] = 0
-        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN Y DIR':
-            staad_force[0] = 0
-            staad_force[2] = 0
-        if LC == 'PSAS SUSTAINED THERMAL PRESSURE IN Z DIR':
-            staad_force[0] = 0
-            staad_force[1] = 0
         std_input += '*input for ' + str(psas_point) + '\n'
-        std_input += staad_poin_force_command_record(staadPointNumber, staad_force, reduceZero=True)
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS PRESSURE 2':
+        psas_force = respoint.get_force_vector('Pressure2')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        std_input += '*input for ' + str(psas_point) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS PRESSURE 3':
+        psas_force = respoint.get_force_vector('Pressure3')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        std_input += '*input for ' + str(psas_point) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS THERMAL 1':
+        psas_force = respoint.get_force_vector('Thermal1')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        std_input += '*input for ' + str(psas_point) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS THERMAL 2':
+        psas_force = respoint.get_force_vector('Thermal2')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        std_input += '*input for ' + str(psas_point) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
+    #--------------------------------------------------------------------------------------------------
+    if LC == 'PSAS THERMAL 3':
+        psas_force = respoint.get_force_vector('Thermal3')
+        if not psas_force: return '*!!!!!!No Pressure1 data in psas at point %s!!!!!!'%str(psas_point)
+        psas_force = np.array(psas_force)
+        staad_force = force_transform(psas_force, ucsTransform) * forceFactor
+        staad_force = np.round(staad_force, decimals=3)
+        std_input += '*input for ' + str(psas_point) + '\n'
+        std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
     if LC == 'PSAS SNOW':
         psas_force = respoint.get_force_vector('Snow')
@@ -223,7 +226,6 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' using PSAS ' + wind_dir + ' wind'   + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     #--------------------------------------------------------------------------------------------------
@@ -242,8 +244,24 @@ def get_staad_command(LC, respoint, staadPointNumber, ucsTransform, psasForceUni
         psas_force = np.array(psas_force)
         staad_force = force_transform(psas_force, ucsTransform) * forceFactor
         staad_force = np.round(staad_force, decimals=3)
-        staad_force = abs(staad_force)
         std_input += '*input for ' + str(psas_point) + ' using PSAS ' + wind_dir + ' wind'   + '\n'
         std_input += staad_poin_force_command_record(staadPointNumber, staad_force)
     return std_input
 #show_staad_input()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

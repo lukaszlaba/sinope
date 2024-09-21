@@ -41,7 +41,7 @@ from mainwindow_ui import Ui_MainWindow
 from support_respoint import support_respoint
 
 import staadTemplate_PYT
-import staadTemplate_JDC
+import staadTemplate_FPT
 
 
 support_dict = {}
@@ -58,12 +58,12 @@ dxfopendir = os.path.dirname(__file__)#dir path for save and open
 support_dict = {}
 
 #---
-available_staad_templates = ['PYT', 'JDC']
+available_staad_templates = ['PYT', 'FPT']
 load_case_list = []
 ucs_transform_possible = []
 get_staad_command = None
 #---
-version = 'sinope 0.4.3'
+version = 'sinope 0.4.4'
 
 class MAINWINDOW(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -96,6 +96,8 @@ class MAINWINDOW(QtWidgets.QMainWindow):
         self.ui.pushButton_staadGet.clicked.connect(show_staad_input)
         self.ui.pushButton_Compare.clicked.connect(show_compare)
         #--
+        self.ui.comboBox_staadTemplate.currentIndexChanged.connect(set_template)
+        #---
         self.ui.pushButton_get_from_dxf.clicked.connect(get_staad_psas_points_from_dxf)
 
 def ui_update_1():
@@ -143,10 +145,12 @@ def set_template():
         load_case_list = staadTemplate_PYT.load_case_list
         ucs_transform_possible = staadTemplate_PYT.ucs_transform_possible
         get_staad_command = staadTemplate_PYT.get_staad_command
-    if myapp.ui.comboBox_staadTemplate.currentText() == 'JDC':
-        load_case_list = staadTemplate_JDC.load_case_list
-        ucs_transform_possible = staadTemplate_JDC.ucs_transform_possible
-        get_staad_command = staadTemplate_JDC.get_staad_command
+        myapp.ui.textBrowser_output.setText('Staad template changed in to PYT' + staadTemplate_PYT.description)
+    if myapp.ui.comboBox_staadTemplate.currentText() == 'FPT':
+        load_case_list = staadTemplate_FPT.load_case_list
+        ucs_transform_possible = staadTemplate_FPT.ucs_transform_possible
+        get_staad_command = staadTemplate_FPT.get_staad_command
+        myapp.ui.textBrowser_output.setText('Staad template changed in to FPT' + staadTemplate_FPT.description)
     myapp.ui.comboBox_staadLC.clear()
     myapp.ui.comboBox_staadLC.addItems(load_case_list + ['All'])
     myapp.ui.comboBox_staadUCS.clear()
@@ -214,6 +218,15 @@ def loaddata():
             if 'CENTRALIZER' in s.Tag or 'REF' in s.Tag:
                 load_report += s.Point + ' ' + s.Tag + ' purged \n'
                 support_dict.pop(key)
+    #---checking that moment results are present
+    for key in list(support_dict):
+        s = support_dict[key]
+        for case in s.CombList:
+            moments = s.get_moment_vector(case)
+            if moments:
+                load_report += s.Point + ' '  + ' include moments ' + str(moments) + ' (!!!!!!!!!!!!!!!!!!!!!!!!!!) \n'
+                load_report +='Sinope does not process PSAS moments\n'
+
     #---pushing supports type list to combobox
     type_list = []
     for key in support_dict.keys():
@@ -905,7 +918,6 @@ if __name__ == '__main__':
     myapp = MAINWINDOW()
     print_dialog = QPrintDialog()
     set_title()
-    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-MC stress pipe reaction analysis app. Load data and fill input list to get report.')
     myapp.ui.plainTextEdit_serch.clear()
     myapp.setWindowIcon(QtGui.QIcon('app.ico'))
     #----------------------------------------------------
@@ -917,7 +929,6 @@ if __name__ == '__main__':
     myapp.ui.comboBox_staadUnit.addItems(['kip', 'lbs', 'kN', 'N'])
     myapp.ui.comboBox_staadPsasWE.addItems(['x', 'y'])
     set_template()
-    myapp.ui.comboBox_staadTemplate.setDisabled(True) #for now as only one template available
     #-----------------------------------------------------
     myapp.ui.comboBox_tolerance_from.addItems(['-10', '-20', '-30', '-50', '-100'])
     myapp.ui.comboBox_tolerance_from.setCurrentText('-100')
@@ -929,6 +940,9 @@ if __name__ == '__main__':
     #-----------------------------------------------------
     ui_update_1()
     myapp.ui.comboBox_method.setCurrentIndex(0)
+    #----------------------------------------------------
+    myapp.ui.textBrowser_output.setText('Welcome in sinope - J-MC stress pipe reaction analysis app. Load data and fill input list to get report.')
+    #----------------------------------------------------
     myapp.show()
     sys.exit(app.exec_())
 
