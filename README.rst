@@ -1,3 +1,9 @@
+NOTE - project moved to People-Places-Solutions
+-----------------------------------------------
+
+https://github.com/People-Places-Solutions/Sinope
+
+
 Sinope - J-MC stress pipe reaction analysis app
 ---------------------------------------------------
 
